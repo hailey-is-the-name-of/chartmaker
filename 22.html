@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<title>국정수행평가 차트 퍼블리셔</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<style>
+body{margin:0;font-family:system-ui;background:#fff}
+.wrap{max-width:1100px;margin:32px auto;padding:0 16px}
+.card{border:1px solid #ddd;border-radius:14px;padding:18px}
+.chartBox{height:560px}
+.titleCenter{text-align:center;font-weight:700;margin-bottom:12px}
+.legendRow{display:flex;gap:12px;justify-content:center;font-size:12px;color:#444}
+.swatch{width:28px;border-top:3px solid}
+.toolbox{
+position:fixed;top:16px;right:16px;z-index:9999;
+display:flex;gap:8px;padding:10px;background:#fff;border:1px solid #ddd;border-radius:12px
+}
+.toolbox button,.toolbox select{padding:8px 12px;font-weight:700}
+</style>
+</head>
+
+<body>
+
+<div class="toolbox">
+<button onclick="openEditor()">설정</button>
+<select id="preset">
+<option value="A4">A4</option>
+<option value="INSTAGRAM">인스타</option>
+<option value="TWITTER">트위터</option>
+</select>
+<button onclick="exportChart('png')">PNG</button>
+<button onclick="exportChart('pdf')">PDF</button>
+</div>
+
+<div class="wrap">
+<div class="card" id="captureTarget">
+<h1 id="chartTitle" class="titleCenter">대구·경북 국정 수행 평가도</h1>
+<div id="legend" class="legendRow"></div>
+<div class="chartBox"><canvas id="chart"></canvas></div>
+</div>
+</div>
+
+<!-- ===== Editor ===== -->
+<div id="editor" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4)">
+<div style="background:#fff;width:600px;margin:5vh auto;padding:20px;border-radius:12px">
+<h3>출력 설정</h3>
+<label>차트 제목</label>
+<input id="titleInput" style="width:100%"><br><br>
+
+<label>각주 / 출처 문구</label>
+<input id="footnoteInput" style="width:100%" placeholder="출처: 한국갤럽 · 지역: 대구·경북">
+
+<br><br>
+<label><input type="checkbox" id="wmToggle"> 워터마크 표시</label>
+<br><br>
+<button onclick="applyEditor()">적용</button>
+<button onclick="closeEditor()">닫기</button>
+</div>
+</div>
+
+<script>
+/* =======================
+   프리셋 정의 + 자동스케일
+======================= */
+const PRESETS={
+A4:{w:2480,h:3508,base:2480},
+INSTAGRAM:{w:1080,h:1080,base:1080},
+TWITTER:{w:1600,h:900,base:1600}
+};
+
+function scale(p,ratio){return Math.round(p*ratio);}
+
+/* =======================
+   워터마크 플러그인
+======================= */
+const wmImg=new Image();
+wmImg.src="150_png_dgsd_logo.png";
+
+const wmPlugin={
+id:"wm",
+afterDraw(c,args,opt){
+if(!opt.enabled||!wmImg.complete)return;
+const a=c.chartArea,ctx=c.ctx;
+const w=a.width*0.35;
+const h=w*(wmImg.height/wmImg.width);
+ctx.save();
+ctx.globalAlpha=0.15;
+ctx.drawImage(wmImg,a.left+(a.width-w)/2,a.top+(a.height-h)/2,w,h);
+ctx.restore();
+}
+};
+
+/* =======================
+   차트 생성
+======================= */
+Chart.register(ChartDataLabels);
+
+const chart=new Chart(document.getElementById("chart"),{
+type:"line",
+plugins:[wmPlugin],
+data:{
+labels:["10월","11월","12월","1월","2월"],
+datasets:[
+{label:"긍정 17-18",data:[57,63,56,51,48],borderColor:"#6699ff",borderDash:[6,4],borderWidth:4,_show:true},
+{label:"부정 17-18",data:[32,25,31,32,40],borderColor:"#ff6666",borderDash:[6,4],borderWidth:4,_show:true},
+{label:"긍정 25-26",data:[39.7,44.7,48,44.5],borderColor:"#3366ff",borderWidth:4,_show:true},
+{label:"부정 25-26",data:[45.7,42.5,41.5,41],borderColor:"#cc3333",borderWidth:4,_show:true}
+]
+},
+options:{
+interaction:{mode:null},
+plugins:{
+legend:{display:false},
+tooltip:{enabled:true},
+wm:{enabled:false},
+datalabels:{
+display:c=>c.dataset._show,
+formatter:v=>v+"%",
+align:"top",
+offset:6,
+font:{weight:"700"}
+}
+}
+});
+
+function renderLegend(){
+const l=document.getElementById("legend");
+l.innerHTML="";
+chart.data.datasets.forEach(d=>{
+const s=document.createElement("span");
+const i=document.createElement("i");
+i.className="swatch";
+i.style.borderColor=d.borderColor;
+s.appendChild(i);
+s.append(d.label);
+l.appendChild(s);
+});
+}
+renderLegend();
+
+/* =======================
+   Editor
+======================= */
+function openEditor(){
+document.getElementById("editor").style.display="block";
+titleInput.value=chartTitle.innerText;
+footnoteInput.value=localStorage.footnote||"";
+wmToggle.checked=chart.options.plugins.wm.enabled;
+}
+function closeEditor(){editor.style.display="none";}
+function applyEditor(){
+chartTitle.innerText=titleInput.value;
+localStorage.footnote=footnoteInput.value;
+chart.options.plugins.wm.enabled=wmToggle.checked;
+chart.update();
+closeEditor();
+}
+
+/* =======================
+   출력 프레임 합성
+======================= */
+function compose(canvas,presetKey){
+const p=PRESETS[presetKey];
+const ratio=p.w/p.base;
+const margin=scale(160,ratio);
+const titleSize=scale(52,ratio);
+const footSize=scale(26,ratio);
+
+const out=document.createElement("canvas");
+out.width=p.w;out.height=p.h;
+const ctx=out.getContext("2d");
+ctx.fillStyle="#fff";ctx.fillRect(0,0,p.w,p.h);
+
+ctx.font=`bold ${titleSize}px sans-serif`;
+ctx.textAlign="center";
+ctx.fillStyle="#111";
+ctx.fillText(chartTitle.innerText,p.w/2,margin/2);
+
+const areaW=p.w-margin*2;
+const areaH=p.h-margin*2.2;
+const s=Math.min(areaW/canvas.width,areaH/canvas.height);
+const dw=canvas.width*s,dh=canvas.height*s;
+ctx.drawImage(canvas,(p.w-dw)/2,margin+(areaH-dh)/2,dw,dh);
+
+ctx.font=`${footSize}px sans-serif`;
+ctx.fillStyle="#666";
+ctx.textAlign="left";
+ctx.fillText(localStorage.footnote||"",margin,p.h-margin/2);
+
+return out;
+}
+
+/* =======================
+   Export
+======================= */
+async function exportChart(type){
+chart.options.events=[];
+chart.tooltip.setActiveElements([]);
+chart.update("none");
+
+await new Promise(r=>setTimeout(r,50));
+
+const raw=await html2canvas(captureTarget,{scale:3,backgroundColor:"#fff"});
+chart.options.events=undefined;
+chart.update();
+
+const preset=document.getElementById("preset").value;
+const framed=compose(raw,preset);
+const name=chartTitle.innerText.replace(/\s/g,"_");
+
+if(type==="png"){
+const a=document.createElement("a");
+a.href=framed.toDataURL();
+a.download=name+"_"+preset+".png";
+a.click();
+}else{
+const {jsPDF}=window.jspdf;
+const pdf=new jsPDF({unit:"px",format:[framed.width,framed.height]});
+pdf.addImage(framed.toDataURL(),"PNG",0,0,framed.width,framed.height);
+pdf.save(name+"_"+preset+".pdf");
+}
+}
+</script>
+</body>
+</html>
