@@ -1029,6 +1029,10 @@
           myChart.update();
 
           await new Promise(r => setTimeout(r, 250));
+// ✅ 스샷 직전: 툴팁/hover 상태 제거
+myChart.setActiveElements([]);
+if (myChart.tooltip) myChart.tooltip.setActiveElements([], { x: 0, y: 0 });
+myChart.update('none');
 
           const canvas = await html2canvas(target, {
             scale: SCALE_FACTOR,
