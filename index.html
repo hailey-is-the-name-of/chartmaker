@@ -800,10 +800,90 @@
       shotBtn.style.cssText =
         "position:fixed; top:20px; right:20px; z-index:9999; padding:10px 20px; background:#333; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-family:sans-serif; box-shadow:0 2px 5px rgba(0,0,0,0.3);";
 
-      shotBtn.onclick = async () => {
-        try { await captureCardPng(); }
-        catch (err) { alert("스크린샷 저장 실패: " + err.message); }
-      };
+shotBtn.onclick = async function () {
+  if (!myChart) return;
+
+  // ===== 0. 차트 상태 백업 =====
+  const prevTooltipEnabled = myChart.options.plugins.tooltip.enabled;
+  const prevInteraction = { ...myChart.options.interaction };
+  const prevDPR = myChart.options.devicePixelRatio || 1;
+
+  try {
+    // ===== 1. 툴팁 & hover 완전 봉인 =====
+    myChart.options.plugins.tooltip.enabled = false;
+    myChart.options.interaction = { mode: null, intersect: false };
+    myChart.setActiveElements([]);
+    if (myChart.tooltip) {
+      myChart.tooltip.setActiveElements([], { x: 0, y: 0 });
+    }
+    myChart.update('none');
+
+    // ===== 2. 파일명 입력 (이 구간에서 마우스 튀어도 안전) =====
+    const dateStr = getFormattedDate();
+    const d = new Date();
+    const timeStr =
+      String(d.getHours()).padStart(2, '0') +
+      String(d.getMinutes()).padStart(2, '0');
+
+    const title = document.getElementById('chartTitle').innerText;
+    const safeTitle = sanitizeFilename(title) || "Chart";
+    const defaultName = `${safeTitle}_${dateStr}_${timeStr}.png`;
+
+    let filename = prompt("이미지 파일 이름을 입력하세요:", defaultName);
+    if (!filename) throw new Error("cancel");
+    if (!filename.endsWith('.png')) filename += '.png';
+
+    // ===== 3. 고해상도 렌더링 =====
+    const SCALE_FACTOR = 3;
+    const MARGIN = 50;
+    const target = document.querySelector('.card');
+    if (!target) throw new Error("target not found");
+
+    myChart.options.devicePixelRatio = SCALE_FACTOR;
+    myChart.resize();
+    myChart.update('none');
+
+    // 레이아웃 안정화 대기
+    await new Promise(r => setTimeout(r, 300));
+
+    // ===== 4. 캡처 =====
+    const canvas = await html2canvas(target, {
+      scale: SCALE_FACTOR,
+      backgroundColor: '#ffffff',
+      logging: false,
+      useCORS: true
+    });
+
+    // ===== 5. 마진 포함 최종 캔버스 =====
+    const finalCanvas = document.createElement('canvas');
+    const m = MARGIN * SCALE_FACTOR;
+    finalCanvas.width = canvas.width + m * 2;
+    finalCanvas.height = canvas.height + m * 2;
+
+    const ctx2 = finalCanvas.getContext('2d');
+    ctx2.fillStyle = '#ffffff';
+    ctx2.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+    ctx2.drawImage(canvas, m, m);
+
+    const a = document.createElement('a');
+    a.download = filename;
+    a.href = finalCanvas.toDataURL("image/png");
+    a.click();
+
+  } catch (err) {
+    if (err.message !== "cancel") {
+      alert("스크린샷 저장 실패: " + err.message);
+    }
+  } finally {
+    // ===== 6. 차트 상태 완전 복구 =====
+    myChart.options.devicePixelRatio = prevDPR;
+    myChart.options.plugins.tooltip.enabled = prevTooltipEnabled;
+    myChart.options.interaction = prevInteraction;
+
+    myChart.resize();
+    myChart.update();
+  }
+};
 
       document.body.appendChild(shotBtn);
     }
