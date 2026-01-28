@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>정부국정수행평가도 17-18년, 25-26년</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+  <!-- datalabels plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <!-- ScreenShot Lib -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- jsPDF (PDF export) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
+      background: #fff;
+      color: #111;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .chartBox { height: 560px; }
+    canvas { width: 100% !important; height: 100% !important; }
+
+    .titleCenter {
+      text-align: center;
+      margin: 0 0 12px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .legendRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      color: #444;
+      margin-bottom: 12px;
+    }
+    .legendRow .lg {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .swatch {
+      width: 28px;
+      height: 0;
+      border-top: 3px solid #000;
+      display: inline-block;
+      border-radius: 999px;
+    }
+
+    /* ===== Floating toolbar ===== */
+    .toolbox {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      backdrop-filter: blur(6px);
+    }
+    .toolbox select, .toolbox button, .toolbox input[type="text"]{
+      font-family: inherit;
+      font-size: 13px;
+    }
+    .toolbox select {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+    }
+    .toolbox button {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .toolbox button.secondary {
+      background: #fff;
+      color: #222;
+      border-color: #ccc;
+      font-weight: 700;
+    }
+
+    .hint {
+      max-width: 1100px;
+      margin: 10px auto 0;
+      padding: 0 16px;
+      color: #666;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* ===== Modal Styles (Editor) ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 0;
+      border-radius: 12px;
+      width: 900px;
+      max-width: 95%;
+      height: 80vh;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9f9f9;
+    }
+    .modal-title { font-size: 18px; font-weight: bold; }
+    .modal-body {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 10px;
+      border-left: 4px solid #333;
+      padding-left: 8px;
+    }
+    .control-group { margin-bottom: 12px; }
+    .control-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #555;
+    }
+    .control-group input[type="text"], .control-group input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .series-list {
+      border: 1px solid #eee;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .series-item {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .series-item:last-child { border-bottom: none; }
+    .series-item:nth-child(even) { background: #fafafa; }
+    .series-item input[type="text"] {
+      flex: 1 1 320px;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      min-width: 220px;
+    }
+    .series-item input[type="color"] {
+      width: 44px;
+      height: 36px;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: none;
+    }
+    .series-item select, .series-item input[type="number"] {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .series-item input[type="number"] {
+      width: 78px;
+    }
+    .btn-del {
+      background: #fee;
+      color: #d00;
+      border: 1px solid #fcc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .btn-add {
+      background: #eff;
+      color: #00a;
+      border: 1px solid #cee;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      margin-top: 8px;
+      display: inline-block;
+    }
+
+    .table-container {
+      position: relative;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 420px;
+      background: #fff;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      font-family: sans-serif;
+    }
+    .data-table th, .data-table td {
+      border: 1px solid #ddd;
+      padding: 0;
+      min-width: 70px;
+      height: 34px;
+    }
+    .data-table thead th {
+      position: sticky;
+      top: 0;
+      background: #f4f4f4;
+      z-index: 10;
+      padding: 8px;
+      text-align: center;
+      font-weight: 800;
+      color: #333;
+      white-space: normal;
+      word-break: keep-all;
+    }
+    .data-table input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      padding: 0 10px;
+      box-sizing: border-box;
+      font-family: inherit;
+      background: transparent;
+      text-align: center;
+    }
+    .data-table input:focus { background: #eef; }
+
+    .modal-footer {
+      padding: 14px 18px;
+      border-top: 1px solid #eee;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-weight: 800;
+      font-family: inherit;
+    }
+    .btn.primary {
+      background: #333;
+      color: #fff;
+      border-color: #333;
+    }
+    .helper-text { font-size: 12px; color: #666; margin: 0 0 6px; line-height: 1.5; }
+  </style>
+</head>
+
+<body>
+  <!-- Floating Toolbar -->
+  <div class="toolbox">
+    <button class="secondary" id="openEditorBtn">설정/데이터</button>
+
+    <select id="presetSelect" title="내보내기 비율">
+      <option value="A4">A4 (PDF/인쇄)</option>
+      <option value="INSTAGRAM">인스타 (1:1)</option>
+      <option value="TWITTER">트위터 (16:9)</option>
+    </select>
+
+    <button id="exportPngBtn">PNG 저장</button>
+    <button class="secondary" id="exportPdfBtn">PDF 저장</button>
+  </div>
+
+  <div class="wrap">
+    <div class="card" id="captureTarget">
+      <h1 class="titleCenter" id="chartTitle">대구·경북 국정 수행 평가도(한국갤럽) 17-18년, 25-26년</h1>
+      <div class="legendRow" id="legendContainer"></div>
+      <div class="chartBox">
+        <canvas id="govChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">
+    • 스샷 저장 시 “클릭한 것처럼 툴팁이 찍히는 현상”은 캡처 직전에 <b>툴팁/hover 상태를 강제로 OFF</b>하고,
+    캡처 동안 <b>차트 이벤트를 잠깐 막는 방식</b>으로 해결했어.
+  </div>
+
+  <!-- Editor Modal -->
+  <div id="editModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">차트 데이터 및 스타일 수정</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button id="applyEditorBtnHeader" class="btn primary" style="padding:8px 12px; font-size:13px;">적용</button>
+          <button id="closeEditorBtnX" style="border:none; background:none; font-size:22px; cursor:pointer;">&times;</button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <div class="section-title">기본 설정</div>
+
+          <div class="control-group">
+            <label>차트 제목</label>
+            <input type="text" id="chartTitleInput">
+          </div>
+
+          <div class="control-group" style="display:flex; gap:10px;">
+            <div style="flex:1;">
+              <label>Y축 최소값</label>
+              <input type="number" id="yMinInput" placeholder="Auto">
+            </div>
+            <div style="flex:1;">
+              <label>Y축 최대값</label>
+              <input type="number" id="yMaxInput" placeholder="Auto">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="watermarkToggle">
+              워터마크 표시 (로고)
+            </label>
+          </div>
+
+          <div class="section-title" style="margin-top:16px;">
+            항목(Series) 설정
+            <span style="font-size:11px; font-weight:normal; color:#666;">(데이터 열 순서와 일치해야 함)</span>
+          </div>
+
+          <div class="series-list" id="seriesList"></div>
+          <button class="btn-add" id="addSeriesBtn">+ 항목 추가</button>
+
+          <div style="margin-top:20px;">
+            <div class="section-title">데이터 입력</div>
+            <div class="helper-text">
+              엑셀에서 복사하여 붙여넣으세요.<br>
+              첫 열은 <strong>X축(기간)</strong>, 이후 열은 위 항목 순서대로 매칭됩니다. (빈칸은 탭 유지)
+            </div>
+            <div class="table-container">
+              <table id="dataTable" class="data-table">
+                <thead></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <div style="margin-right:auto; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn" id="saveDataBtn" style="background:#eef; border-color:#ccd;">💿 저장</button>
+              <button class="btn" id="loadDataBtn" style="background:#eef; border-color:#ccd;">📂 불러오기</button>
+              <input type="file" id="loadDataInput" accept=".json" style="display:none;">
+            </div>
+            <button class="btn" id="closeEditorBtn">닫기</button>
+            <button class="btn primary" id="applyEditorBtn">적용하기</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /***********************
+   * 0) Export Presets
+   ***********************/
+  const EXPORT_PRESETS = {
+    A4: { name: "A4 세로(인쇄)", width: 2480, height: 3508, margin: 170 },
+    INSTAGRAM: { name: "인스타(1:1)", width: 1080, height: 1080, margin: 90 },
+    TWITTER: { name: "트위터(16:9)", width: 1600, height: 900, margin: 110 },
+  };
+
+  /***********************
+   * 1) Watermark Plugin
+   ***********************/
+  const watermarkImg = new Image();
+  watermarkImg.crossOrigin = "anonymous";
+  watermarkImg.src = "150_png_dgsd_logo.png"; // 같은 폴더에 있어야 함
+
+  const watermarkPlugin = {
+    id: "watermarkPlugin",
+    afterDraw(chart, args, pluginOptions) {
+      if (!pluginOptions || !pluginOptions.enabled) return;
+      const img = pluginOptions.image;
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return;
+
+      const { left, top, width, height } = chartArea;
+      const targetW = pluginOptions.width ?? 300;
+      const ratio = img.naturalHeight / img.naturalWidth;
+      const targetH = targetW * ratio;
+
+      const x = left + (width - targetW) / 2;
+      const y = top + (height - targetH) / 2;
+
+      ctx.save();
+      ctx.globalAlpha = pluginOptions.opacity ?? 0.15;
+      ctx.drawImage(img, x, y, targetW, targetH);
+      ctx.restore();
+    }
+  };
+
+  /***********************
+   * 2) Initial chart data
+   ***********************/
+  let myChart = null;
+
+  const initLabels = ["10월", "11월", "12월", "1월", "2월"];
+  const initDatasets = [
+    {
+      label: "긍정평가 17-18년 (문재인 정부)",
+      data: [57, 63, 56, 51, 48],
+      borderColor: "#6699ff",
+      borderDash: [8, 6],
+      borderWidth: 5,
+      pointRadius: 4,
+      tension: 0.25,
+      _showLabel: true
+    },
+    {
+      label: "부정평가 17-18년 (문재인 정부)",
+      data: [32, 25, 31, 32, 40],
+      borderColor: "#ff6666",
+      borderDash: [8, 6],
+      borderWidth: 5,
+      pointRadius: 4,
+      tension: 0.25,
+      _showLabel: true
+    },
+    {
+      label: "긍정평가 25-26년 (이재명 정부)",
+      data: [39.7, 44.7, 48, 44.5],
+      borderColor: "#3c78ff",
+      borderDash: [],
+      borderWidth: 5,
+      pointRadius: 4,
+      tension: 0.25,
+      _showLabel: true
+    },
+    {
+      label: "부정평가 25-26년 (이재명 정부)",
+      data: [45.7, 42.5, 41.5, 41],
+      borderColor: "#e63c3c",
+      borderDash: [],
+      borderWidth: 5,
+      pointRadius: 4,
+      tension: 0.25,
+      _showLabel: true
+    }
+  ];
+
+  /***********************
+   * 3) Utils
+   ***********************/
+  function getFormattedDate() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}${mm}${dd}`;
+  }
+  function getFormattedTimeHHMM() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
+  }
+  function sanitizeFilename(name) {
+    return String(name || "Chart").replace(/[^a-z0-9가-힣\s_-]/gi, '').trim() || "Chart";
+  }
+  function saveToLocalStorage(data) {
+    try { localStorage.setItem('govChartData', JSON.stringify(data)); }
+    catch (e) { console.warn("LocalStorage Save Failed", e); }
+  }
+
+  function renderLegend() {
+    const container = document.getElementById('legendContainer');
+    if (!container || !myChart) return;
+    container.innerHTML = '';
+    (myChart.data.datasets || []).forEach(ds => {
+      const span = document.createElement('span');
+      span.className = 'lg';
+
+      const i = document.createElement('i');
+      i.className = 'swatch';
+      i.style.borderColor = ds.borderColor;
+      i.style.borderTopWidth = (ds.borderWidth || 3) + 'px';
+      i.style.borderTopStyle = (ds.borderDash && ds.borderDash.length > 0) ? 'dashed' : 'solid';
+
+      span.appendChild(i);
+      span.appendChild(document.createTextNode(ds.label));
+      container.appendChild(span);
+    });
+  }
+
+  /***********************
+   * 4) Editor table/series
+   ***********************/
+  function renderTable(seriesList, dataTable) {
+    const thead = dataTable.querySelector('thead');
+    const tbody = dataTable.querySelector('tbody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    const headTr = document.createElement('tr');
+    const thTime = document.createElement('th');
+    thTime.innerText = "기간(X축)";
+    headTr.appendChild(thTime);
+
+    const seriesInputs = seriesList.querySelectorAll('.series-item input[type="text"]');
+    seriesInputs.forEach(inp => {
+      const th = document.createElement('th');
+      th.innerText = inp.value || "항목";
+      headTr.appendChild(th);
+    });
+    thead.appendChild(headTr);
+
+    const labels = myChart.data.labels || [];
+    const datasets = myChart.data.datasets || [];
+
+    // existing rows
+    for (let i = 0; i < labels.length; i++) {
+      const tr = document.createElement('tr');
+
+      const tdTime = document.createElement('td');
+      const inpTime = document.createElement('input');
+      inpTime.type = 'text';
+      inpTime.value = labels[i];
+      tdTime.appendChild(inpTime);
+      tr.appendChild(tdTime);
+
+      seriesInputs.forEach((_, idx) => {
+        const td = document.createElement('td');
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        if (datasets[idx] && datasets[idx].data[i] !== undefined) inp.value = datasets[idx].data[i];
+        td.appendChild(inp);
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    }
+
+    // one empty row
+    const trEmpty = document.createElement('tr');
+    const count = 1 + seriesInputs.length;
+    for (let k = 0; k < count; k++) {
+      const td = document.createElement('td');
+      const inp = document.createElement('input');
+      if (k > 0) inp.type = 'number';
+      td.appendChild(inp);
+      trEmpty.appendChild(td);
+    }
+    tbody.appendChild(trEmpty);
+  }
+
+  function addSeriesRow(seriesList, dataTable, ds) {
+    const div = document.createElement('div');
+    div.className = 'series-item';
+
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = (ds.borderColor && String(ds.borderColor).startsWith('#')) ? ds.borderColor : '#000000';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = ds.label || 'New Series';
+    nameInput.placeholder = '항목 이름';
+    nameInput.addEventListener('input', () => {
+      const idx = Array.from(seriesList.children).indexOf(div);
+      const ths = dataTable.querySelectorAll('thead th');
+      if (ths[idx + 1]) ths[idx + 1].innerText = nameInput.value;
+    });
+
+    const styleSelect = document.createElement('select');
+    styleSelect.add(new Option('실선', 'solid'));
+    styleSelect.add(new Option('점선', 'dashed'));
+    styleSelect.value = (ds.borderDash && ds.borderDash.length > 0) ? 'dashed' : 'solid';
+
+    const widthInput = document.createElement('input');
+    widthInput.type = 'number';
+    widthInput.value = ds.borderWidth || 5;
+    widthInput.min = 1;
+
+    const lblLabel = document.createElement('label');
+    lblLabel.style.display = "inline-flex";
+    lblLabel.style.alignItems = "center";
+    lblLabel.style.gap = "6px";
+    lblLabel.style.fontSize = "12px";
+    lblLabel.style.fontWeight = "800";
+    lblLabel.style.color = "#444";
+
+    const chkLabel = document.createElement('input');
+    chkLabel.type = 'checkbox';
+    chkLabel.className = 'chk-show-label';
+    chkLabel.checked = (ds._showLabel !== false);
+    lblLabel.appendChild(chkLabel);
+    lblLabel.appendChild(document.createTextNode("값(%)"));
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn-del';
+    delBtn.innerText = '삭제';
+    delBtn.onclick = () => {
+      div.remove();
+      renderTable(seriesList, dataTable);
+    };
+
+    div.appendChild(colorInput);
+    div.appendChild(nameInput);
+    div.appendChild(styleSelect);
+    div.appendChild(widthInput);
+    div.appendChild(lblLabel);
+    div.appendChild(delBtn);
+
+    seriesList.appendChild(div);
+  }
+
+  function loadChartFromData(savedData, uiRefs) {
+    const { titleInput, yMinInput, yMaxInput, seriesList, dataTable, watermarkToggle } = uiRefs;
+
+    if (savedData.title) {
+      document.getElementById('chartTitle').innerText = savedData.title;
+      titleInput.value = savedData.title;
+    }
+
+    if (savedData.yMin !== undefined) {
+      myChart.options.scales.y.min = savedData.yMin;
+      yMinInput.value = savedData.yMin;
+    } else {
+      delete myChart.options.scales.y.min;
+      yMinInput.value = "";
+    }
+    if (savedData.yMax !== undefined) {
+      myChart.options.scales.y.max = savedData.yMax;
+      yMaxInput.value = savedData.yMax;
+    } else {
+      delete myChart.options.scales.y.max;
+      yMaxInput.value = "";
+    }
+
+    if (savedData.showWatermark !== undefined) {
+      watermarkToggle.checked = !!savedData.showWatermark;
+      if (myChart.options.plugins.watermarkPlugin) {
+        myChart.options.plugins.watermarkPlugin.enabled = !!savedData.showWatermark;
+      }
+    }
+
+    myChart.data.labels = savedData.labels || [];
+    myChart.data.datasets = (savedData.datasets || []).map(ds => ({
+      ...ds,
+      borderWidth: ds.borderWidth ?? 5,
+      pointRadius: ds.pointRadius ?? 4,
+      tension: ds.tension ?? 0.25,
+      _showLabel: ds._showLabel !== false
+    }));
+
+    myChart.update();
+    renderLegend();
+
+    seriesList.innerHTML = '';
+    myChart.data.datasets.forEach(ds => addSeriesRow(seriesList, dataTable, ds));
+    renderTable(seriesList, dataTable);
+  }
+
+  /***********************
+   * 5) Export compose (preset + footnote)
+   ***********************/
+  function drawFootnote(ctx, preset) {
+    const date = new Date().toLocaleDateString('ko-KR');
+    ctx.save();
+    ctx.font = "28px 'Noto Sans KR', system-ui, sans-serif";
+    ctx.fillStyle = "#666";
+    ctx.textBaseline = "bottom";
+
+    ctx.textAlign = "left";
+    ctx.fillText("출처: 한국갤럽 · 지역: 대구·경북", preset.margin, preset.height - preset.margin / 2);
+
+    ctx.textAlign = "right";
+    ctx.fillText(`제작: ${date}`, preset.width - preset.margin, preset.height - preset.margin / 2);
+    ctx.restore();
+  }
+
+  function composeFramedCanvas(capturedCanvas, presetKey, titleText) {
+    const preset = EXPORT_PRESETS[presetKey] || EXPORT_PRESETS.A4;
+
+    const out = document.createElement('canvas');
+    out.width = preset.width;
+    out.height = preset.height;
+    const ctx = out.getContext('2d');
+
+    // background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, out.width, out.height);
+
+    // title
+    ctx.fillStyle = "#111";
+    ctx.font = "bold 52px 'Noto Sans KR', system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(titleText, out.width / 2, preset.margin / 2);
+
+    // chart placement
+    const usableTop = preset.margin + 50;
+    const usableBottom = preset.height - preset.margin * 1.2;
+    const usableHeight = usableBottom - usableTop;
+    const usableWidth = preset.width - preset.margin * 2;
+
+    const scale = Math.min(usableWidth / capturedCanvas.width, usableHeight / capturedCanvas.height);
+    const drawW = capturedCanvas.width * scale;
+    const drawH = capturedCanvas.height * scale;
+    const dx = (out.width - drawW) / 2;
+    const dy = usableTop + (usableHeight - drawH) / 2;
+
+    ctx.drawImage(capturedCanvas, dx, dy, drawW, drawH);
+
+    // footnote
+    drawFootnote(ctx, preset);
+
+    return out;
+  }
+
+  function exportPDF(canvas, filename) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+      unit: 'px',
+      format: [canvas.width, canvas.height]
+    });
+    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, canvas.width, canvas.height);
+    pdf.save(filename);
+  }
+
+  /***********************
+   * 6) Tooltip/Hover 완전 봉인 캡처
+   *    - 캡처 직전: active elements 제거 + tooltip 제거
+   *    - 캡처 동안: 차트 이벤트 잠시 끄기
+   ***********************/
+  function clearChartHoverAndTooltip() {
+    if (!myChart) return;
+    try {
+      myChart.setActiveElements([]);
+      if (myChart.tooltip) {
+        myChart.tooltip.setActiveElements([], { x: 0, y: 0 });
+      }
+      myChart.update('none');
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function setChartEventsEnabled(enabled) {
+    if (!myChart) return;
+    const opts = myChart.options;
+    // Chart.js events list controls hover/tooltip triggers
+    if (!opts._savedEvents) opts._savedEvents = opts.events ? [...opts.events] : undefined;
+
+    if (!enabled) {
+      opts.events = []; // disable all events
+      opts.animation = false;
+      opts.hover = opts.hover || {};
+      opts.hover.animationDuration = 0;
+    } else {
+      opts.events = opts._savedEvents ?? undefined;
+      opts.animation = true;
+    }
+  }
+
+  async function exportChart(presetKey, outputType) {
+    const target = document.getElementById('captureTarget');
+    if (!target) return alert("캡처 대상(.card)을 찾을 수 없음");
+
+    // 파일명
+    const title = document.getElementById('chartTitle').innerText;
+    const safeTitle = sanitizeFilename(title);
+    const dateStr = getFormattedDate();
+    const timeStr = getFormattedTimeHHMM();
+    const baseName = `${safeTitle}_${presetKey}_${dateStr}_${timeStr}`;
+
+    // 1) 캡처 시작 전: hover/tooltip 완전 제거 + 이벤트 OFF
+    clearChartHoverAndTooltip();
+    setChartEventsEnabled(false);
+
+    // 2) html2canvas 캡처 (고해상도)
+    //    ※ 팁: useCORS true로 외부 이미지(로고) 문제를 완화
+    let captured;
+    try {
+      // 약간의 텀: 상태 반영
+      await new Promise(r => setTimeout(r, 60));
+
+      captured = await html2canvas(target, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      });
+    } catch (err) {
+      setChartEventsEnabled(true);
+      myChart.update();
+      return alert("캡처 실패: " + err.message);
+    }
+
+    // 3) 이벤트 ON 복구
+    setChartEventsEnabled(true);
+    myChart.update();
+
+    // 4) 프리셋 프레임 합성
+    const framed = composeFramedCanvas(captured, presetKey, title);
+
+    // 5) 출력
+    if (outputType === "pdf") {
+      exportPDF(framed, baseName + ".pdf");
+    } else {
+      const a = document.createElement('a');
+      a.href = framed.toDataURL("image/png");
+      a.download = baseName + ".png";
+      a.click();
+    }
+  }
+
+  /***********************
+   * 7) Boot
+   ***********************/
+  window.addEventListener('load', () => {
+    Chart.register(ChartDataLabels);
+    Chart.defaults.datasets.line.spanGaps = true;
+
+    const ctx = document.getElementById("govChart");
+    myChart = new Chart(ctx, {
+      type: "line",
+      data: { labels: initLabels, datasets: initDatasets },
+      plugins: [watermarkPlugin],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y}%` }
+          },
+          datalabels: {
+            formatter: v => (v === null || v === undefined) ? "" : (v + "%"),
+            color: "#111",
+            font: { size: 11, weight: "700" },
+            display: (ctx) => ctx.dataset._showLabel !== false,
+            align: ctx => {
+              const i = ctx.dataIndex;
+              const dsIndex = ctx.datasetIndex;
+              const datasets = ctx.chart.data.datasets;
+              const val = datasets[dsIndex].data[i];
+              const isEvenTotal = datasets.length % 2 === 0;
+              if (isEvenTotal) {
+                const partnerIndex = dsIndex % 2 === 0 ? dsIndex + 1 : dsIndex - 1;
+                if (datasets[partnerIndex]) {
+                  const partnerVal = datasets[partnerIndex].data[i];
+                  if (typeof val === 'number' && typeof partnerVal === 'number') {
+                    return val >= partnerVal ? 'top' : 'bottom';
+                  }
+                }
+              }
+              return dsIndex % 2 === 0 ? "top" : "bottom";
+            },
+            offset: 8,
+            clip: false
+          },
+          watermarkPlugin: {
+            enabled: false,
+            image: watermarkImg,
+            opacity: 0.15,
+            width: 300
+          }
+        },
+        scales: {
+          x: { ticks: { color: "#333" }, grid: { color: "#eee" } },
+          y: {
+            suggestedMin: 0,
+            suggestedMax: 85,
+            ticks: { color: "#333", callback: v => v + "%" },
+            grid: { color: "#eee" }
+          }
+        }
+      }
+    });
+
+    watermarkImg.onload = () => { if (myChart) myChart.update(); };
+    renderLegend();
+
+    /***************
+     * Editor wiring
+     ***************/
+    const modal = document.getElementById('editModal');
+    const closeBtn = document.getElementById('closeEditorBtn');
+    const closeBtnX = document.getElementById('closeEditorBtnX');
+    const applyBtn = document.getElementById('applyEditorBtn');
+    const headerApplyBtn = document.getElementById('applyEditorBtnHeader');
+    const addSeriesBtn = document.getElementById('addSeriesBtn');
+
+    const saveDataBtn = document.getElementById('saveDataBtn');
+    const loadDataBtn = document.getElementById('loadDataBtn');
+    const loadDataInput = document.getElementById('loadDataInput');
+
+    const titleInput = document.getElementById('chartTitleInput');
+    const yMinInput = document.getElementById('yMinInput');
+    const yMaxInput = document.getElementById('yMaxInput');
+    const seriesList = document.getElementById('seriesList');
+    const dataTable = document.getElementById('dataTable');
+    const watermarkToggle = document.getElementById('watermarkToggle');
+
+    const uiRefs = { titleInput, yMinInput, yMaxInput, seriesList, dataTable, watermarkToggle };
+
+    function closeModal() { modal.style.display = 'none'; }
+    closeBtn.onclick = closeModal;
+    closeBtnX.onclick = closeModal;
+    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+
+    function openEditor() {
+      titleInput.value = document.getElementById('chartTitle').innerText;
+
+      const yScale = myChart.options.scales.y;
+      yMinInput.value = (typeof yScale.min === 'number') ? yScale.min : "";
+      yMaxInput.value = (typeof yScale.max === 'number') ? yScale.max : "";
+
+      watermarkToggle.checked = !!(myChart.options.plugins.watermarkPlugin && myChart.options.plugins.watermarkPlugin.enabled);
+
+      seriesList.innerHTML = '';
+      myChart.data.datasets.forEach(ds => addSeriesRow(seriesList, dataTable, ds));
+      renderTable(seriesList, dataTable);
+
+      modal.style.display = 'flex';
+    }
+
+    window.openEditor = openEditor;
+
+    function applyChanges() {
+      // Title
+      document.getElementById('chartTitle').innerText = titleInput.value;
+
+      // Datasets config
+      const newDatasets = [];
+      const seriesRows = seriesList.querySelectorAll('.series-item');
+
+      seriesRows.forEach(row => {
+        const color = row.querySelector('input[type="color"]').value;
+        const label = row.querySelector('input[type="text"]').value;
+        const style = row.querySelector('select').value;
+        const width = parseInt(row.querySelector('input[type="number"]').value, 10);
+        const showLabel = row.querySelector('.chk-show-label').checked;
+
+        newDatasets.push({
+          label,
+          borderColor: color,
+          borderDash: style === 'dashed' ? [8, 6] : [],
+          borderWidth: isNaN(width) ? 5 : width,
+          pointRadius: 4,
+          tension: 0.25,
+          _showLabel: showLabel,
+          data: []
+        });
+      });
+
+      // Table -> data
+      const rows = dataTable.querySelectorAll('tbody tr');
+      const newLabels = [];
+
+      rows.forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        const xVal = inputs[0]?.value;
+        if (!xVal) return;
+
+        newLabels.push(xVal);
+
+        for (let j = 0; j < newDatasets.length; j++) {
+          const targetInput = inputs[j + 1];
+          if (targetInput) {
+            const valStr = targetInput.value;
+            const val = (valStr === "") ? null : parseFloat(String(valStr).replace(/[,%]/g, ''));
+            newDatasets[j].data.push(isNaN(val) ? null : val);
+          } else {
+            newDatasets[j].data.push(null);
+          }
+        }
+      });
+
+      myChart.data.labels = newLabels;
+      myChart.data.datasets = newDatasets;
+
+      // y min/max
+      const yMin = parseFloat(yMinInput.value);
+      const yMax = parseFloat(yMaxInput.value);
+      if (!isNaN(yMin)) myChart.options.scales.y.min = yMin;
+      else delete myChart.options.scales.y.min;
+      if (!isNaN(yMax)) myChart.options.scales.y.max = yMax;
+      else delete myChart.options.scales.y.max;
+
+      // watermark
+      if (myChart.options.plugins.watermarkPlugin) {
+        myChart.options.plugins.watermarkPlugin.enabled = watermarkToggle.checked;
+      }
+
+      myChart.update();
+      renderLegend();
+
+      // auto-save
+      saveToLocalStorage({
+        title: document.getElementById('chartTitle').innerText,
+        yMin: myChart.options.scales.y.min,
+        yMax: myChart.options.scales.y.max,
+        showWatermark: watermarkToggle.checked,
+        labels: myChart.data.labels,
+        datasets: myChart.data.datasets.map(ds => ({
+          label: ds.label,
+          data: ds.data,
+          borderColor: ds.borderColor,
+          borderDash: ds.borderDash,
+          borderWidth: ds.borderWidth,
+          pointRadius: ds.pointRadius,
+          tension: ds.tension,
+          _showLabel: ds._showLabel
+        }))
+      });
+
+      closeModal();
+    }
+
+    applyBtn.onclick = applyChanges;
+    if (headerApplyBtn) headerApplyBtn.onclick = applyChanges;
+
+    addSeriesBtn.onclick = () => {
+      addSeriesRow(seriesList, dataTable, { label: '새 항목', borderColor: '#000000', borderDash: [], borderWidth: 5, _showLabel: true });
+      renderTable(seriesList, dataTable);
+    };
+
+    saveDataBtn.onclick = () => {
+      const dataToSave = {
+        title: document.getElementById('chartTitle').innerText,
+        yMin: myChart.options.scales.y.min,
+        yMax: myChart.options.scales.y.max,
+        showWatermark: !!(myChart.options.plugins.watermarkPlugin && myChart.options.plugins.watermarkPlugin.enabled),
+        labels: myChart.data.labels,
+        datasets: myChart.data.datasets.map(ds => ({
+          label: ds.label,
+          data: ds.data,
+          borderColor: ds.borderColor,
+          borderDash: ds.borderDash,
+          borderWidth: ds.borderWidth,
+          pointRadius: ds.pointRadius,
+          tension: ds.tension,
+          _showLabel: ds._showLabel
+        }))
+      };
+
+      const dateStr = getFormattedDate();
+      const safeTitle = sanitizeFilename(dataToSave.title);
+      const defaultName = `${safeTitle}_${dateStr}.json`;
+
+      const filename = prompt("저장할 파일 이름을 입력하세요:", defaultName);
+      if (!filename) return;
+
+      const jsonStr = JSON.stringify(dataToSave, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename.endsWith('.json') ? filename : (filename + ".json");
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    loadDataBtn.onclick = () => loadDataInput.click();
+    loadDataInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const savedData = JSON.parse(evt.target.result);
+          loadChartFromData(savedData, uiRefs);
+          alert("데이터를 성공적으로 불러왔습니다.");
+        } catch (err) {
+          alert("파일 읽기 오류: " + err.message);
+        }
+        loadDataInput.value = '';
+      };
+      reader.readAsText(file);
+    };
+
+    // excel paste
+    dataTable.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const clipboard = (e.clipboardData || window.clipboardData).getData('text');
+      if (!clipboard) return;
+
+      const rows = clipboard.trim().split(/\r\n|\n|\r/);
+      let activeInput = document.activeElement;
+      let startRowIdx = 0;
+      let startColIdx = 0;
+
+      const tableRows = Array.from(dataTable.querySelectorAll('tbody tr'));
+
+      if (activeInput && activeInput.tagName === 'INPUT') {
+        const td = activeInput.closest('td');
+        const tr = td.closest('tr');
+        if (td && tr) {
+          startRowIdx = tableRows.indexOf(tr);
+          startColIdx = Array.from(tr.children).indexOf(td);
+        }
+      }
+
+      rows.forEach((rowStr, rI) => {
+        const cells = rowStr.split('\t');
+        let targetRow = tableRows[startRowIdx + rI];
+
+        if (!targetRow) {
+          const lastRow = tableRows[tableRows.length - 1];
+          if (lastRow) {
+            const newRow = lastRow.cloneNode(true);
+            newRow.querySelectorAll('input').forEach(i => i.value = '');
+            dataTable.querySelector('tbody').appendChild(newRow);
+            targetRow = newRow;
+            tableRows.push(newRow);
+          }
+        }
+
+        if (targetRow) {
+          const inputs = targetRow.querySelectorAll('input');
+          cells.forEach((val, cI) => {
+            const targetInput = inputs[startColIdx + cI];
+            if (targetInput) {
+              let safeVal = val.trim();
+              if (targetInput.type === 'number') safeVal = safeVal.replace(/[,%]/g, '');
+              targetInput.value = safeVal;
+            }
+          });
+        }
+      });
+    });
+
+    // auto-load
+    const autoSaved = localStorage.getItem('govChartData');
+    if (autoSaved) {
+      try {
+        loadChartFromData(JSON.parse(autoSaved), uiRefs);
+      } catch (e) {
+        console.warn("Auto-load failed", e);
+      }
+    }
+
+    // Toolbar buttons
+    document.getElementById('openEditorBtn').onclick = openEditor;
+
+    document.getElementById('exportPngBtn').onclick = () => {
+      const presetKey = document.getElementById('presetSelect').value;
+      exportChart(presetKey, "png");
+    };
+    document.getElementById('exportPdfBtn').onclick = () => {
+      const presetKey = document.getElementById('presetSelect').value;
+      exportChart(presetKey, "pdf");
+    };
+  });
+</script>
+</body>
+</html>
