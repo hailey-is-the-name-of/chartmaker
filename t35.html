@@ -19,7 +19,6 @@
     .chartBox { height: 560px; }
     canvas { width: 100% !important; height: 100% !important; }
 
-    /* ✅ 제목/부제목 (멀티라인 지원: <br>) */
     .titleCenter { text-align: center; margin: 0 0 6px; font-weight: 800; line-height: 1.15; }
     .subtitleCenter { text-align: center; margin: 0 0 14px; color: #444; font-weight: 400; line-height: 1.2; display: none; white-space: normal; }
 
@@ -31,7 +30,7 @@
     .legendRow .lg { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .swatch { width: 28px; height: 0; border-top: 3px solid #000; display: inline-block; border-radius: 999px; }
 
-    /* Modal Styles */
+    /* Modal */
     .modal-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.5);
@@ -42,7 +41,6 @@
       background: #fff; padding: 0; border-radius: 12px;
       width: 980px; max-width: 95%; height: 82vh;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      font-family: sans-serif;
       display: flex; flex-direction: column; overflow: hidden;
     }
     .modal-header {
@@ -82,7 +80,7 @@
     .btn-add { background:#eff; color:#00a; border:1px solid #cee; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:bold; margin-top:8px; display:inline-block; }
 
     .table-container { position:relative; border:1px solid #ccc; border-radius:8px; overflow:auto; max-height:500px; background:#fff; }
-    .data-table { width:100%; border-collapse:collapse; font-size:13px; font-family:sans-serif; }
+    .data-table { width:100%; border-collapse:collapse; font-size:13px; }
     .data-table th, .data-table td { border:1px solid #ddd; padding:0; min-width:60px; height:32px; }
     .data-table thead th {
       position: sticky; top:0; background:#f4f4f4; z-index:10;
@@ -91,7 +89,7 @@
     }
     .data-table input {
       width:100%; height:100%; border:none; outline:none; padding:0 8px;
-      box-sizing:border-box; font-family:inherit; background:transparent; text-align:center;
+      box-sizing:border-box; background:transparent; text-align:center;
     }
     .data-table input:focus { background:#eef; }
 
@@ -103,7 +101,6 @@
     .btn.primary { background:#333; color:#fff; border-color:#333; }
     .helper-text { font-size:12px; color:#666; margin-bottom:4px; }
 
-    /* ✅ Slider Row */
     .sliderRow { display:flex; align-items:center; gap:10px; }
     .sliderRow input[type="range"] { width: 100%; }
     .sliderVal { font-size: 12px; color:#333; font-weight: 700; min-width: 48px; text-align:right; }
@@ -111,16 +108,13 @@
     .miniBtns button { padding:6px 10px; border-radius:8px; }
 
     .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 820px){
-      .grid2 { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 820px){ .grid2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <div class="card">
-      <!-- ✅ 멀티라인 타이틀/부제목 -->
       <div class="titleCenter" id="chartTitle" style="font-size:18px;">
         대구·경북 국정 수행 평가도(한국갤럽) 17-18년, 25-26년
       </div>
@@ -146,11 +140,10 @@
         <div>
           <div class="section-title">기본 설정</div>
 
-          <!-- ✅ 제목/부제목 멀티라인 입력(enter 지원) -->
           <div class="grid2">
             <div class="control-group">
               <label>차트 제목 (Enter 줄바꿈 가능)</label>
-              <textarea id="chartTitleInput" rows="2" placeholder="예) 대구·경북 국정 수행 평가도&#10;(한국갤럽) 17-18년, 25-26년"></textarea>
+              <textarea id="chartTitleInput" rows="2" placeholder="예) ...&#10;..."></textarea>
               <div class="sliderRow" style="margin-top:8px;">
                 <div class="miniBtns">
                   <button type="button" class="btn" id="titleFontMinus">-</button>
@@ -164,7 +157,6 @@
             <div class="control-group">
               <label>부제목 (빈칸이면 숨김 / Enter 줄바꿈 가능)</label>
               <textarea id="chartSubtitleInput" rows="2" placeholder="예) 표본/조사기간/출처 등"></textarea>
-
               <div class="sliderRow" style="margin-top:8px;">
                 <div class="miniBtns">
                   <button type="button" class="btn" id="subFontMinus">-</button>
@@ -183,7 +175,6 @@
             </div>
           </div>
 
-          <!-- ✅ 축 제목 + 폰트 크기 -->
           <div class="section-title" style="margin-top:18px;">축 제목 (Axis Title)</div>
           <div class="grid2">
             <div class="control-group">
@@ -213,7 +204,6 @@
             </div>
           </div>
 
-          <!-- ✅ 축 눈금 폰트 크기 -->
           <div class="section-title" style="margin-top:18px;">축 폰트 크기 (Ticks)</div>
           <div class="grid2">
             <div class="control-group">
@@ -241,7 +231,6 @@
             </div>
           </div>
 
-          <!-- Y축 min/max + watermark -->
           <div class="control-group" style="display:flex; gap:10px; margin-top:8px;">
             <div style="flex:1;">
               <label>Y축 최소값</label>
@@ -303,54 +292,11 @@
   </div>
 
 <script>
-  // ==============
-  // 1) 워터마크
-  // ==============
-  const watermarkImg = new Image();
-  watermarkImg.crossOrigin = "anonymous";
-  watermarkImg.src = "150_png_dgsd_logo.png"; // 파일 없으면 워터마크만 안 뜸(차트는 정상)
-
-  const watermarkPlugin = {
-    id: "watermarkPlugin",
-    afterDraw(chart, args, pluginOptions) {
-      if (!pluginOptions || !pluginOptions.enabled) return;
-      const img = pluginOptions.image;
-      if (!img || !img.complete || img.naturalWidth === 0) return;
-
-      const { ctx, chartArea } = chart;
-      if (!chartArea) return;
-
-      const { left, top, width, height } = chartArea;
-      const targetW = pluginOptions.width ?? 300;
-      const ratio = img.naturalHeight / img.naturalWidth;
-      const targetH = targetW * ratio;
-
-      const x = left + (width - targetW) / 2;
-      const y = top + (height - targetH) / 2;
-
-      ctx.save();
-      ctx.globalAlpha = pluginOptions.opacity ?? 0.15;
-      ctx.drawImage(img, x, y, targetW, targetH);
-      ctx.restore();
-    }
-  };
-
-  // ==============
-  // 2) 초기 데이터
-  // ==============
-  let myChart = null;
-
-  const initLabels = ["10월", "11월", "12월", "1월", "2월"];
-  const initDatasets = [
-    { label:"긍정평가 17-18년 (문재인 정부)", data:[57,63,56,51,48], borderColor:"#6699ff", borderDash:[8,6], borderWidth:5, pointRadius:4, tension:0.25, _showLabel:true },
-    { label:"부정평가 17-18년 (문재인 정부)", data:[32,25,31,32,40], borderColor:"#ff6666", borderDash:[8,6], borderWidth:5, pointRadius:4, tension:0.25, _showLabel:true },
-    { label:"긍정평가 25-26년 (이재명 정부)", data:[39.7,44.7,48,44.5], borderColor:"#3c78ff", borderDash:[], borderWidth:5, pointRadius:4, tension:0.25, _showLabel:true },
-    { label:"부정평가 25-26년 (이재명 정부)", data:[45.7,42.5,41.5,41], borderColor:"#e63c3c", borderDash:[], borderWidth:5, pointRadius:4, tension:0.25, _showLabel:true }
-  ];
-
-  // ==============
-  // 3) 유틸
-  // ==============
+(function(){
+  // ======================
+  // A) 안전 유틸
+  // ======================
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
   function getFormattedDate() {
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -362,41 +308,158 @@
     return String(name || "").replace(/<br\s*\/?>/gi, ' ')
       .replace(/[^a-z0-9가-힣\s_-]/gi, '').trim();
   }
-  function saveToLocalStorage(data) {
-    try { localStorage.setItem('govChartData', JSON.stringify(data)); }
-    catch (e) { console.warn("LocalStorage Save Failed", e); }
-  }
-  function nextFrame() {
-    return new Promise(r => requestAnimationFrame(() => r()));
-  }
-  function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-
-  // ✅ textarea 자동 높이
   function autosizeTextarea(el){
     if (!el) return;
     el.style.height = 'auto';
     el.style.height = (el.scrollHeight) + 'px';
   }
-
-  // ✅ Enter 줄바꿈 -> <br> (XSS 방지용 이스케이프)
   function escapeHtml(str){
     return String(str || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
   function nl2brSafe(str){
     return escapeHtml(str).replace(/\r\n|\n|\r/g, "<br>");
   }
+  function br2nl(str){
+    return String(str || "").replace(/<br\s*\/?>/gi, "\n");
+  }
+  function saveToLocalStorage(data){
+    try { localStorage.setItem('govChartData', JSON.stringify(data)); }
+    catch(e){ console.warn(e); }
+  }
 
-  // ==============
-  // ✅ 3-1) 그리드 유틸: 행 추가 / 초기화
-  // ==============
+  // ======================
+  // B) 워터마크 (없어도 차트 OK)
+  // ======================
+  const watermarkImg = new Image();
+  watermarkImg.crossOrigin = "anonymous";
+  watermarkImg.src = "150_png_dgsd_logo.png"; // 없어도 됨
+
+  const watermarkPlugin = {
+    id: "watermarkPlugin",
+    afterDraw(chart, args, opts) {
+      if (!opts || !opts.enabled) return;
+      const img = opts.image;
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return;
+
+      const { left, top, width, height } = chartArea;
+      const targetW = opts.width ?? 300;
+      const ratio = img.naturalHeight / img.naturalWidth;
+      const targetH = targetW * ratio;
+
+      const x = left + (width - targetW) / 2;
+      const y = top + (height - targetH) / 2;
+
+      ctx.save();
+      ctx.globalAlpha = opts.opacity ?? 0.15;
+      ctx.drawImage(img, x, y, targetW, targetH);
+      ctx.restore();
+    }
+  };
+
+  // ======================
+  // C) 초기 데이터 (길이 자동 맞춤)
+  // ======================
+  const initLabels = ["10월", "11월", "12월", "1월", "2월"];
+  const initDatasets = [
+    { label:"긍정평가 17-18년 (문재인 정부)", data:[57,63,56,51,48], borderColor:"#6699ff", borderDash:[8,6], borderWidth:5, pointRadius:4, tension:0.25, _showLabel:true },
+    { label:"부정평가 17-18년 (문재인 정부)", data:[32,25,31,32,40], borderColor:"#ff6666", borderDash:[8,6], borderWidth:5, pointRadius:4, tension:0.25, _showLabel:true },
+    { label:"긍정평가 25-26년 (이재명 정부)", data:[39.7,44.7,48,44.5], borderColor:"#3c78ff", borderDash:[], borderWidth:5, pointRadius:4, tension:0.25, _showLabel:true },
+    { label:"부정평가 25-26년 (이재명 정부)", data:[45.7,42.5,41.5,41], borderColor:"#e63c3c", borderDash:[], borderWidth:5, pointRadius:4, tension:0.25, _showLabel:true }
+  ];
+
+  function padDatasetToLabels(ds, labelsLen){
+    const arr = Array.isArray(ds.data) ? ds.data.slice() : [];
+    while(arr.length < labelsLen) arr.push(null);
+    return { ...ds, data: arr.slice(0, labelsLen) };
+  }
+
+  // ======================
+  // D) 차트/레전드
+  // ======================
+  let myChart = null;
+
+  function renderLegend(){
+    const container = document.getElementById('legendContainer');
+    if (!container || !myChart) return;
+    container.innerHTML = '';
+    (myChart.data.datasets || []).forEach(ds => {
+      const span = document.createElement('span');
+      span.className = 'lg';
+      const i = document.createElement('i');
+      i.className = 'swatch';
+      i.style.borderColor = ds.borderColor || "#000";
+      i.style.borderTopWidth = (ds.borderWidth || 3) + 'px';
+      i.style.borderTopStyle = (ds.borderDash && ds.borderDash.length > 0) ? 'dashed' : 'solid';
+      span.appendChild(i);
+      span.appendChild(document.createTextNode(ds.label || ""));
+      container.appendChild(span);
+    });
+  }
+
+  function setTitleDom(text, fontSize){
+    const el = document.getElementById('chartTitle');
+    const t = String(text || "").trim();
+    el.innerHTML = nl2brSafe(t || "Chart");
+    el.style.fontSize = (Number(fontSize) || 18) + "px";
+  }
+  function setSubtitleDom(text, fontSize, bold){
+    const el = document.getElementById('chartSubtitle');
+    const t = String(text || "").trim();
+    if (!t){
+      el.innerHTML = "";
+      el.style.display = "none";
+      return;
+    }
+    el.innerHTML = nl2brSafe(t);
+    el.style.display = "block";
+    el.style.fontSize = (Number(fontSize) || 13) + "px";
+    el.style.fontWeight = bold ? "700" : "400";
+  }
+
+  function applyAxisTitlesToChart(xTitle, yTitle, xTitleSize, yTitleSize){
+    if (!myChart) return;
+    const sx = myChart.options.scales.x;
+    const sy = myChart.options.scales.y;
+
+    sx.title = sx.title || {};
+    sy.title = sy.title || {};
+
+    sx.title.display = !!String(xTitle || "").trim();
+    sx.title.text = String(xTitle || "").trim();
+    sx.title.font = sx.title.font || {};
+    sx.title.font.size = Number(xTitleSize) || 12;
+    sx.title.font.weight = "700";
+    sx.title.color = "#333";
+
+    sy.title.display = !!String(yTitle || "").trim();
+    sy.title.text = String(yTitle || "").trim();
+    sy.title.font = sy.title.font || {};
+    sy.title.font.size = Number(yTitleSize) || 12;
+    sy.title.font.weight = "700";
+    sy.title.color = "#333";
+  }
+
+  function applyTickFontsToChart(xTickSize, yTickSize){
+    if (!myChart) return;
+    myChart.options.scales.x.ticks.font = myChart.options.scales.x.ticks.font || {};
+    myChart.options.scales.y.ticks.font = myChart.options.scales.y.ticks.font || {};
+    myChart.options.scales.x.ticks.font.size = Number(xTickSize) || 12;
+    myChart.options.scales.y.ticks.font.size = Number(yTickSize) || 12;
+  }
+
+  // ======================
+  // E) 에디터 테이블/시리즈
+  // ======================
   function addEmptyRowToTable(dataTable) {
     const tbody = dataTable.querySelector('tbody');
-    const seriesCount = dataTable.querySelectorAll('thead th').length - 1; // X축 제외
+    const seriesCount = dataTable.querySelectorAll('thead th').length - 1;
     const tr = document.createElement('tr');
 
     const tdX = document.createElement('td');
@@ -414,7 +477,6 @@
     }
 
     tbody.appendChild(tr);
-    inpX.focus();
   }
 
   function resetGridInputs(dataTable) {
@@ -424,30 +486,6 @@
     if (rows.length > 1) rows.slice(1).forEach(r => r.remove());
   }
 
-  // ==============
-  // 4) Legend
-  // ==============
-  function renderLegend() {
-    const container = document.getElementById('legendContainer');
-    if (!container || !myChart) return;
-    container.innerHTML = '';
-    (myChart.data.datasets || []).forEach(ds => {
-      const span = document.createElement('span');
-      span.className = 'lg';
-      const i = document.createElement('i');
-      i.className = 'swatch';
-      i.style.borderColor = ds.borderColor;
-      i.style.borderTopWidth = (ds.borderWidth || 3) + 'px';
-      i.style.borderTopStyle = (ds.borderDash && ds.borderDash.length > 0) ? 'dashed' : 'solid';
-      span.appendChild(i);
-      span.appendChild(document.createTextNode(ds.label));
-      container.appendChild(span);
-    });
-  }
-
-  // ==============
-  // 5) Editor helpers
-  // ==============
   function renderTable(seriesList, dataTable) {
     const thead = dataTable.querySelector('thead');
     const tbody = dataTable.querySelector('tbody');
@@ -484,7 +522,8 @@
         const td = document.createElement('td');
         const inp = document.createElement('input');
         inp.type = 'number';
-        if (datasets[idx] && datasets[idx].data[i] !== undefined) inp.value = datasets[idx].data[i];
+        const v = (datasets[idx] && datasets[idx].data) ? datasets[idx].data[i] : null;
+        inp.value = (v === null || v === undefined) ? "" : v;
         td.appendChild(inp);
         tr.appendChild(td);
       });
@@ -553,150 +592,27 @@
     seriesList.appendChild(div);
   }
 
-  function setSubtitleDom(text, fontSize, bold){
-    const subEl = document.getElementById('chartSubtitle');
-    const t = String(text || "").trim();
-    if (!t){
-      subEl.innerHTML = "";
-      subEl.style.display = "none";
-      return;
-    }
-    subEl.innerHTML = nl2brSafe(t);
-    subEl.style.display = "block";
-    if (Number.isFinite(fontSize)) subEl.style.fontSize = fontSize + "px";
-    subEl.style.fontWeight = bold ? "700" : "400";
-  }
-
-  function setTitleDom(text, fontSize){
-    const titleEl = document.getElementById('chartTitle');
-    const t = String(text || "").trim();
-    titleEl.innerHTML = nl2brSafe(t || "Chart");
-    if (Number.isFinite(fontSize)) titleEl.style.fontSize = fontSize + "px";
-  }
-
-  function applyAxisTitlesToChart(xTitle, yTitle, xTitleSize, yTitleSize){
-    if (!myChart) return;
-
-    myChart.options.scales.x.title = myChart.options.scales.x.title || {};
-    myChart.options.scales.y.title = myChart.options.scales.y.title || {};
-
-    myChart.options.scales.x.title.display = !!String(xTitle || "").trim();
-    myChart.options.scales.x.title.text = String(xTitle || "").trim();
-    myChart.options.scales.x.title.font = myChart.options.scales.x.title.font || {};
-    if (Number.isFinite(xTitleSize)) myChart.options.scales.x.title.font.size = xTitleSize;
-
-    myChart.options.scales.y.title.display = !!String(yTitle || "").trim();
-    myChart.options.scales.y.title.text = String(yTitle || "").trim();
-    myChart.options.scales.y.title.font = myChart.options.scales.y.title.font || {};
-    if (Number.isFinite(yTitleSize)) myChart.options.scales.y.title.font.size = yTitleSize;
-  }
-
-  function applyTickFontsToChart(xTickSize, yTickSize){
-    if (!myChart) return;
-    myChart.options.scales.x.ticks.font = myChart.options.scales.x.ticks.font || {};
-    myChart.options.scales.y.ticks.font = myChart.options.scales.y.ticks.font || {};
-    if (Number.isFinite(xTickSize)) myChart.options.scales.x.ticks.font.size = xTickSize;
-    if (Number.isFinite(yTickSize)) myChart.options.scales.y.ticks.font.size = yTickSize;
-  }
-
-  function loadChartFromData(savedData, uiRefs) {
-    // title + subtitle
-    const tSize = parseInt(savedData.titleFontSize ?? 18, 10);
-    setTitleDom(savedData.title ?? "", Number.isFinite(tSize) ? tSize : 18);
-
-    const sSize = parseInt(savedData.subtitleFontSize ?? 13, 10);
-    setSubtitleDom(savedData.subtitle ?? "", Number.isFinite(sSize) ? sSize : 13, !!savedData.subtitleBold);
-
-    // y range
-    if (savedData.yMin !== undefined && savedData.yMin !== null && savedData.yMin !== "") {
-      myChart.options.scales.y.min = savedData.yMin;
-      uiRefs.yMinInput.value = savedData.yMin;
-    } else {
-      delete myChart.options.scales.y.min;
-      uiRefs.yMinInput.value = "";
-    }
-    if (savedData.yMax !== undefined && savedData.yMax !== null && savedData.yMax !== "") {
-      myChart.options.scales.y.max = savedData.yMax;
-      uiRefs.yMaxInput.value = savedData.yMax;
-    } else {
-      delete myChart.options.scales.y.max;
-      uiRefs.yMaxInput.value = "";
-    }
-
-    // watermark
-    uiRefs.watermarkToggle.checked = !!savedData.showWatermark;
-    if (myChart.options.plugins.watermarkPlugin) myChart.options.plugins.watermarkPlugin.enabled = !!savedData.showWatermark;
-
-    // datasets
-    myChart.data.labels = savedData.labels || [];
-    myChart.data.datasets = (savedData.datasets || []).map(ds => ({
-      ...ds,
-      borderWidth: ds.borderWidth ?? 5,
-      pointRadius: ds.pointRadius ?? 4,
-      tension: ds.tension ?? 0.25,
-      _showLabel: ds._showLabel !== false
-    }));
-
-    // axis titles
-    const xTitle = savedData.xAxisTitle ?? "";
-    const yTitle = savedData.yAxisTitle ?? "";
-    const xTitleSize = parseInt(savedData.xAxisTitleSize ?? 12, 10);
-    const yTitleSize = parseInt(savedData.yAxisTitleSize ?? 12, 10);
-    applyAxisTitlesToChart(xTitle, yTitle, xTitleSize, yTitleSize);
-
-    // ticks
-    const xTick = parseInt(savedData.xAxisFontSize ?? 12, 10);
-    const yTick = parseInt(savedData.yAxisFontSize ?? 12, 10);
-    applyTickFontsToChart(xTick, yTick);
-
-    myChart.update('none');
-    renderLegend();
-
-    // UI sync
-    uiRefs.chartTitleInput.value = String(savedData.title || "").replace(/\<br\>/gi, "\n");
-    autosizeTextarea(uiRefs.chartTitleInput);
-
-    uiRefs.titleFontSizeRange.value = Number.isFinite(tSize) ? tSize : 18;
-    uiRefs.titleFontSizeVal.innerText = uiRefs.titleFontSizeRange.value;
-
-    uiRefs.chartSubtitleInput.value = String(savedData.subtitle || "").replace(/\<br\>/gi, "\n");
-    autosizeTextarea(uiRefs.chartSubtitleInput);
-
-    uiRefs.subtitleFontSizeRange.value = Number.isFinite(sSize) ? sSize : 13;
-    uiRefs.subtitleFontSizeVal.innerText = uiRefs.subtitleFontSizeRange.value;
-    uiRefs.subtitleBoldToggle.checked = !!savedData.subtitleBold;
-
-    uiRefs.xAxisTitleInput.value = xTitle;
-    uiRefs.yAxisTitleInput.value = yTitle;
-    uiRefs.xAxisTitleSizeRange.value = Number.isFinite(xTitleSize) ? xTitleSize : 12;
-    uiRefs.yAxisTitleSizeRange.value = Number.isFinite(yTitleSize) ? yTitleSize : 12;
-    uiRefs.xAxisTitleSizeVal.innerText = uiRefs.xAxisTitleSizeRange.value;
-    uiRefs.yAxisTitleSizeVal.innerText = uiRefs.yAxisTitleSizeRange.value;
-
-    uiRefs.xAxisFontSizeRange.value = Number.isFinite(xTick) ? xTick : 12;
-    uiRefs.yAxisFontSizeRange.value = Number.isFinite(yTick) ? yTick : 12;
-    uiRefs.xAxisFontSizeVal.innerText = uiRefs.xAxisFontSizeRange.value;
-    uiRefs.yAxisFontSizeVal.innerText = uiRefs.yAxisFontSizeRange.value;
-
-    uiRefs.seriesList.innerHTML = '';
-    myChart.data.datasets.forEach(ds => addSeriesRow(uiRefs.seriesList, uiRefs.dataTable, ds));
-    renderTable(uiRefs.seriesList, uiRefs.dataTable);
-  }
-
-  // ==============
-  // 7) 시작
-  // ==============
+  // ======================
+  // F) 시작 (차트 "무조건" 생성)
+  // ======================
   window.addEventListener('load', () => {
     try {
-      Chart.register(ChartDataLabels);
-      Chart.defaults.datasets.line.spanGaps = true;
+      // 1) 플러그인 등록 (안 잡혀도 안 터짐)
+      if (window.ChartDataLabels) Chart.register(window.ChartDataLabels);
 
-      const ctx = document.getElementById("govChart");
-      if (!ctx) throw new Error("#govChart canvas not found");
+      // 2) canvas 확인
+      const canvas = document.getElementById("govChart");
+      if (!canvas) throw new Error("#govChart canvas not found");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("2d context not available");
 
+      // 3) 데이터 길이 통일
+      const padded = initDatasets.map(ds => padDatasetToLabels(ds, initLabels.length));
+
+      // 4) 차트 생성
       myChart = new Chart(ctx, {
         type: "line",
-        data: { labels: initLabels, datasets: initDatasets },
+        data: { labels: initLabels.slice(), datasets: padded },
         plugins: [watermarkPlugin],
         options: {
           responsive: true,
@@ -704,26 +620,29 @@
           interaction: { mode: "index", intersect: false },
           plugins: {
             legend: { display: false },
-            tooltip: { enabled: true, callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y}%` } },
+            tooltip: {
+              enabled: true,
+              callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y}%` }
+            },
             datalabels: {
               formatter: v => (v === null || v === undefined) ? "" : (v + "%"),
               color: "#111",
               font: { size: 11, weight: "700" },
-              display: (ctx) => ctx.dataset._showLabel !== false,
-              align: ctx => {
-                const i = ctx.dataIndex;
-                const dsIndex = ctx.datasetIndex;
-                const datasets = ctx.chart.data.datasets;
+              display: (c) => (c && c.dataset && c.dataset._showLabel !== false),
+              align: (c) => {
+                const i = c.dataIndex;
+                const dsIndex = c.datasetIndex;
+                const datasets = c.chart.data.datasets;
                 const val = datasets[dsIndex].data[i];
-                const isEvenTotal = datasets.length % 2 === 0;
-                if (isEvenTotal) {
-                  const partnerIndex = dsIndex % 2 === 0 ? dsIndex + 1 : dsIndex - 1;
-                  if (datasets[partnerIndex]) {
-                    const partnerVal = datasets[partnerIndex].data[i];
-                    if (typeof val === 'number' && typeof partnerVal === 'number') return val >= partnerVal ? 'top' : 'bottom';
+                const partnerIndex = (dsIndex % 2 === 0) ? dsIndex + 1 : dsIndex - 1;
+                const partner = datasets[partnerIndex];
+                if (partner){
+                  const partnerVal = partner.data[i];
+                  if (typeof val === 'number' && typeof partnerVal === 'number') {
+                    return val >= partnerVal ? 'top' : 'bottom';
                   }
                 }
-                return dsIndex % 2 === 0 ? "top" : "bottom";
+                return (dsIndex % 2 === 0) ? 'top' : 'bottom';
               },
               offset: 8,
               clip: false
@@ -739,24 +658,25 @@
             x: {
               ticks: { color: "#333", font: { size: 12 } },
               grid: { color: "#eee" },
-              title: { display: false, text: "", font: { size: 12, weight: "700" }, color: "#333" }
+              title: { display: false, text: "", font: { size: 12, weight:"700" }, color:"#333" }
             },
             y: {
               suggestedMin: 0,
               suggestedMax: 85,
               ticks: { color: "#333", font: { size: 12 }, callback: v => v + "%" },
               grid: { color: "#eee" },
-              title: { display: false, text: "", font: { size: 12, weight: "700" }, color: "#333" }
+              title: { display: false, text: "", font: { size: 12, weight:"700" }, color:"#333" }
             }
           }
         }
       });
 
       watermarkImg.onload = () => { if (myChart) myChart.update('none'); };
-
       renderLegend();
 
-      // ===== UI refs
+      // ======================
+      // G) UI refs
+      // ======================
       const modal = document.getElementById('editModal');
       const closeBtn = document.getElementById('closeEditorBtn');
       const closeBtnX = document.getElementById('closeEditorBtnX');
@@ -798,7 +718,6 @@
       const resetGridBtn = document.getElementById('resetGridBtn');
       const addRowBtn = document.getElementById('addRowBtn');
 
-      // +/- buttons
       const titleFontMinus = document.getElementById('titleFontMinus');
       const titleFontPlus  = document.getElementById('titleFontPlus');
       const subFontMinus = document.getElementById('subFontMinus');
@@ -813,33 +732,18 @@
       const yTitleMinus = document.getElementById('yTitleMinus');
       const yTitlePlus  = document.getElementById('yTitlePlus');
 
-      const uiRefs = {
-        chartTitleInput, chartSubtitleInput,
-        titleFontSizeRange, titleFontSizeVal,
-        subtitleFontSizeRange, subtitleFontSizeVal,
-        subtitleBoldToggle,
-        xAxisTitleInput, yAxisTitleInput,
-        xAxisTitleSizeRange, yAxisTitleSizeRange,
-        xAxisTitleSizeVal, yAxisTitleSizeVal,
-        xAxisFontSizeRange, yAxisFontSizeRange,
-        xAxisFontSizeVal, yAxisFontSizeVal,
-        yMinInput, yMaxInput, seriesList, dataTable, watermarkToggle
-      };
-
-      function closeModal() { modal.style.display = 'none'; }
+      function closeModal(){ modal.style.display = 'none'; }
       closeBtn.onclick = closeModal;
       closeBtnX.onclick = closeModal;
       modal.onclick = (e) => { if (e.target === modal) closeModal(); };
 
-      // ✅ textarea autosize
+      // textarea autosize
       [chartTitleInput, chartSubtitleInput].forEach(el => {
         autosizeTextarea(el);
         el.addEventListener('input', () => autosizeTextarea(el));
       });
 
-      // ✅ 슬라이더 값 표시
       function syncSliderVal(rangeEl, valEl){
-        if (!rangeEl || !valEl) return;
         valEl.innerText = rangeEl.value;
       }
       [
@@ -854,7 +758,6 @@
         r.addEventListener('input', () => syncSliderVal(r,v));
       });
 
-      // ✅ +/- 버튼 -> range 조절
       function bumpRange(rangeEl, delta){
         const cur = parseInt(rangeEl.value, 10);
         const min = parseInt(rangeEl.min, 10);
@@ -871,80 +774,68 @@
       xFontPlus.onclick  = () => bumpRange(xAxisFontSizeRange, +1);
       yFontMinus.onclick = () => bumpRange(yAxisFontSizeRange, -1);
       yFontPlus.onclick  = () => bumpRange(yAxisFontSizeRange, +1);
-
       xTitleMinus.onclick = () => bumpRange(xAxisTitleSizeRange, -1);
       xTitlePlus.onclick  = () => bumpRange(xAxisTitleSizeRange, +1);
       yTitleMinus.onclick = () => bumpRange(yAxisTitleSizeRange, -1);
       yTitlePlus.onclick  = () => bumpRange(yAxisTitleSizeRange, +1);
 
-      // ✅ 데이터 초기화 / 행 추가
       resetGridBtn.onclick = () => {
         if (!confirm("데이터 입력 그리드를 전부 비울까? (차트 반영은 '적용하기' 눌러야 함)")) return;
         resetGridInputs(dataTable);
       };
       addRowBtn.onclick = () => addEmptyRowToTable(dataTable);
 
-      window.openEditor = function () {
-        // 현재 DOM값 -> editor
-        const titleDomText = document.getElementById('chartTitle').innerText || "";
-        chartTitleInput.value = titleDomText;
+      window.openEditor = function(){
+        chartTitleInput.value = document.getElementById('chartTitle').innerText || "";
         autosizeTextarea(chartTitleInput);
-
-        const tSize = parseInt(window.getComputedStyle(document.getElementById('chartTitle')).fontSize, 10) || 18;
-        titleFontSizeRange.value = tSize;
-        titleFontSizeVal.innerText = tSize;
 
         const subtitleEl = document.getElementById('chartSubtitle');
         chartSubtitleInput.value = subtitleEl.innerText || "";
         autosizeTextarea(chartSubtitleInput);
 
-        const sSize = parseInt(window.getComputedStyle(subtitleEl).fontSize, 10) || 13;
-        subtitleFontSizeRange.value = sSize;
-        subtitleFontSizeVal.innerText = sSize;
+        titleFontSizeRange.value = parseInt(getComputedStyle(document.getElementById('chartTitle')).fontSize, 10) || 18;
+        titleFontSizeVal.innerText = titleFontSizeRange.value;
 
-        const w = window.getComputedStyle(subtitleEl).fontWeight;
-        subtitleBoldToggle.checked = (parseInt(w, 10) >= 700) || (w === 'bold');
+        subtitleFontSizeRange.value = parseInt(getComputedStyle(subtitleEl).fontSize, 10) || 13;
+        subtitleFontSizeVal.innerText = subtitleFontSizeRange.value;
 
-        // axis titles
-        xAxisTitleInput.value = (myChart.options.scales.x.title && myChart.options.scales.x.title.text) ? myChart.options.scales.x.title.text : "";
-        yAxisTitleInput.value = (myChart.options.scales.y.title && myChart.options.scales.y.title.text) ? myChart.options.scales.y.title.text : "";
+        const w = getComputedStyle(subtitleEl).fontWeight;
+        subtitleBoldToggle.checked = (parseInt(w,10) >= 700) || (w === 'bold');
 
-        const xTs = myChart.options.scales.x.title?.font?.size ?? 12;
-        const yTs = myChart.options.scales.y.title?.font?.size ?? 12;
-        xAxisTitleSizeRange.value = xTs; xAxisTitleSizeVal.innerText = xTs;
-        yAxisTitleSizeRange.value = yTs; yAxisTitleSizeVal.innerText = yTs;
+        xAxisTitleInput.value = myChart.options.scales.x.title?.text || "";
+        yAxisTitleInput.value = myChart.options.scales.y.title?.text || "";
 
-        // tick fonts
-        const xTick = myChart.options.scales.x.ticks?.font?.size ?? 12;
-        const yTick = myChart.options.scales.y.ticks?.font?.size ?? 12;
-        xAxisFontSizeRange.value = xTick; xAxisFontSizeVal.innerText = xTick;
-        yAxisFontSizeRange.value = yTick; yAxisFontSizeVal.innerText = yTick;
+        xAxisTitleSizeRange.value = myChart.options.scales.x.title?.font?.size ?? 12;
+        yAxisTitleSizeRange.value = myChart.options.scales.y.title?.font?.size ?? 12;
+        xAxisTitleSizeVal.innerText = xAxisTitleSizeRange.value;
+        yAxisTitleSizeVal.innerText = yAxisTitleSizeRange.value;
 
-        // y range
-        const yScale = myChart.options.scales.y;
-        yMinInput.value = (typeof yScale.min === 'number') ? yScale.min : "";
-        yMaxInput.value = (typeof yScale.max === 'number') ? yScale.max : "";
+        xAxisFontSizeRange.value = myChart.options.scales.x.ticks?.font?.size ?? 12;
+        yAxisFontSizeRange.value = myChart.options.scales.y.ticks?.font?.size ?? 12;
+        xAxisFontSizeVal.innerText = xAxisFontSizeRange.value;
+        yAxisFontSizeVal.innerText = yAxisFontSizeRange.value;
 
-        // watermark
-        watermarkToggle.checked = !!(myChart.options.plugins.watermarkPlugin && myChart.options.plugins.watermarkPlugin.enabled);
+        yMinInput.value = (typeof myChart.options.scales.y.min === 'number') ? myChart.options.scales.y.min : "";
+        yMaxInput.value = (typeof myChart.options.scales.y.max === 'number') ? myChart.options.scales.y.max : "";
 
-        // series + table
+        watermarkToggle.checked = !!myChart.options.plugins.watermarkPlugin?.enabled;
+
         seriesList.innerHTML = '';
-        myChart.data.datasets.forEach(ds => addSeriesRow(seriesList, dataTable, ds));
+        (myChart.data.datasets || []).forEach(ds => addSeriesRow(seriesList, dataTable, ds));
         renderTable(seriesList, dataTable);
 
         modal.style.display = 'flex';
       };
 
-      function applyChanges() {
-        // ✅ 제목/부제목 DOM 반영
+      function applyChanges(){
+        // title/subtitle
         const titleSize = parseInt(titleFontSizeRange.value, 10) || 18;
         setTitleDom(chartTitleInput.value, titleSize);
 
         const subSize = parseInt(subtitleFontSizeRange.value, 10) || 13;
         setSubtitleDom(chartSubtitleInput.value, subSize, !!subtitleBoldToggle.checked);
 
-        // ✅ series config
+        // series config
         const newDatasets = [];
         const seriesRows = seriesList.querySelectorAll('.series-item');
         seriesRows.forEach(row => {
@@ -966,7 +857,7 @@
           });
         });
 
-        // ✅ table -> chart data
+        // table -> chart data
         const rows = dataTable.querySelectorAll('tbody tr');
         const newLabels = [];
 
@@ -984,26 +875,32 @@
           }
         });
 
+        // labels 길이에 맞춰 data padding
+        newDatasets.forEach(ds => {
+          while(ds.data.length < newLabels.length) ds.data.push(null);
+          ds.data = ds.data.slice(0, newLabels.length);
+        });
+
         myChart.data.labels = newLabels;
         myChart.data.datasets = newDatasets;
 
-        // ✅ y min/max
+        // y min/max
         const yMin = parseFloat(yMinInput.value);
         const yMax = parseFloat(yMaxInput.value);
         if (!isNaN(yMin)) myChart.options.scales.y.min = yMin; else delete myChart.options.scales.y.min;
         if (!isNaN(yMax)) myChart.options.scales.y.max = yMax; else delete myChart.options.scales.y.max;
 
-        // ✅ watermark
-        if (myChart.options.plugins.watermarkPlugin) myChart.options.plugins.watermarkPlugin.enabled = watermarkToggle.checked;
+        // watermark
+        myChart.options.plugins.watermarkPlugin.enabled = watermarkToggle.checked;
 
-        // ✅ axis titles
+        // axis titles
         const xTitle = xAxisTitleInput.value;
         const yTitle = yAxisTitleInput.value;
         const xTitleSize = parseInt(xAxisTitleSizeRange.value, 10) || 12;
         const yTitleSize = parseInt(yAxisTitleSizeRange.value, 10) || 12;
         applyAxisTitlesToChart(xTitle, yTitle, xTitleSize, yTitleSize);
 
-        // ✅ tick fonts
+        // ticks
         const xTick = parseInt(xAxisFontSizeRange.value, 10) || 12;
         const yTick = parseInt(yAxisFontSizeRange.value, 10) || 12;
         applyTickFontsToChart(xTick, yTick);
@@ -1011,35 +908,26 @@
         myChart.update('none');
         renderLegend();
 
-        // ✅ save local
         saveToLocalStorage({
           title: nl2brSafe(chartTitleInput.value.trim()),
           titleFontSize: titleSize,
           subtitle: chartSubtitleInput.value.trim(),
           subtitleFontSize: subSize,
           subtitleBold: !!subtitleBoldToggle.checked,
-
           xAxisTitle: xTitle,
           yAxisTitle: yTitle,
           xAxisTitleSize: xTitleSize,
           yAxisTitleSize: yTitleSize,
-
           xAxisFontSize: xTick,
           yAxisFontSize: yTick,
-
           yMin: myChart.options.scales.y.min,
           yMax: myChart.options.scales.y.max,
           showWatermark: watermarkToggle.checked,
           labels: myChart.data.labels,
           datasets: myChart.data.datasets.map(ds => ({
-            label: ds.label,
-            data: ds.data,
-            borderColor: ds.borderColor,
-            borderDash: ds.borderDash,
-            borderWidth: ds.borderWidth,
-            pointRadius: ds.pointRadius,
-            tension: ds.tension,
-            _showLabel: ds._showLabel
+            label: ds.label, data: ds.data, borderColor: ds.borderColor,
+            borderDash: ds.borderDash, borderWidth: ds.borderWidth,
+            pointRadius: ds.pointRadius, tension: ds.tension, _showLabel: ds._showLabel
           }))
         });
 
@@ -1054,54 +942,19 @@
         renderTable(seriesList, dataTable);
       };
 
+      // save/load json
       saveDataBtn.onclick = () => {
-        const titleSize = parseInt(titleFontSizeRange.value, 10) || 18;
-        const subSize = parseInt(subtitleFontSizeRange.value, 10) || 13;
-        const xTick = parseInt(xAxisFontSizeRange.value, 10) || 12;
-        const yTick = parseInt(yAxisFontSizeRange.value, 10) || 12;
-
-        const dataToSave = {
-          title: nl2brSafe(chartTitleInput.value.trim()),
-          titleFontSize: titleSize,
-          subtitle: chartSubtitleInput.value.trim(),
-          subtitleFontSize: subSize,
-          subtitleBold: !!subtitleBoldToggle.checked,
-
-          xAxisTitle: xAxisTitleInput.value,
-          yAxisTitle: yAxisTitleInput.value,
-          xAxisTitleSize: parseInt(xAxisTitleSizeRange.value, 10) || 12,
-          yAxisTitleSize: parseInt(yAxisTitleSizeRange.value, 10) || 12,
-
-          xAxisFontSize: xTick,
-          yAxisFontSize: yTick,
-
-          yMin: myChart.options.scales.y.min,
-          yMax: myChart.options.scales.y.max,
-          showWatermark: !!(myChart.options.plugins.watermarkPlugin && myChart.options.plugins.watermarkPlugin.enabled),
-          labels: myChart.data.labels,
-          datasets: myChart.data.datasets.map(ds => ({
-            label: ds.label,
-            data: ds.data,
-            borderColor: ds.borderColor,
-            borderDash: ds.borderDash,
-            borderWidth: ds.borderWidth,
-            pointRadius: ds.pointRadius,
-            tension: ds.tension,
-            _showLabel: ds._showLabel
-          }))
-        };
-
+        const dataToSave = JSON.parse(localStorage.getItem('govChartData') || "{}");
         const dateStr = getFormattedDate();
         const safeTitle = sanitizeFilename(document.getElementById('chartTitle').innerText) || "Chart";
         const defaultName = `${safeTitle}_${dateStr}.json`;
 
-        const filename = prompt("저장할 파일 이름을 입력하세요:", defaultName);
+        const filename = prompt("저장할 파일 이름:", defaultName);
         if (!filename) return;
 
         const jsonStr = JSON.stringify(dataToSave, null, 2);
         const blob = new Blob([jsonStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
-
         const a = document.createElement('a');
         a.href = url;
         a.download = filename.endsWith('.json') ? filename : (filename + ".json");
@@ -1116,9 +969,30 @@
         const reader = new FileReader();
         reader.onload = (evt) => {
           try {
-            const savedData = JSON.parse(evt.target.result);
-            loadChartFromData(savedData, uiRefs);
-            alert("데이터를 성공적으로 불러왔습니다.");
+            const saved = JSON.parse(evt.target.result);
+
+            setTitleDom(br2nl(saved.title), saved.titleFontSize ?? 18);
+            setSubtitleDom(saved.subtitle ?? "", saved.subtitleFontSize ?? 13, !!saved.subtitleBold);
+
+            myChart.data.labels = saved.labels || [];
+            myChart.data.datasets = (saved.datasets || []).map(ds => padDatasetToLabels(ds, (saved.labels || []).length));
+
+            // y range
+            if (saved.yMin !== undefined && saved.yMin !== null && saved.yMin !== "") myChart.options.scales.y.min = saved.yMin;
+            else delete myChart.options.scales.y.min;
+            if (saved.yMax !== undefined && saved.yMax !== null && saved.yMax !== "") myChart.options.scales.y.max = saved.yMax;
+            else delete myChart.options.scales.y.max;
+
+            myChart.options.plugins.watermarkPlugin.enabled = !!saved.showWatermark;
+
+            applyAxisTitlesToChart(saved.xAxisTitle || "", saved.yAxisTitle || "", saved.xAxisTitleSize ?? 12, saved.yAxisTitleSize ?? 12);
+            applyTickFontsToChart(saved.xAxisFontSize ?? 12, saved.yAxisFontSize ?? 12);
+
+            myChart.update('none');
+            renderLegend();
+
+            saveToLocalStorage(saved);
+            alert("불러오기 완료!");
           } catch (err) {
             alert("파일 읽기 오류: " + err.message);
           }
@@ -1127,28 +1001,46 @@
         reader.readAsText(file);
       };
 
-      // ✅ localStorage auto-load
+      // local auto-load
       const autoSaved = localStorage.getItem('govChartData');
       if (autoSaved) {
-        try { loadChartFromData(JSON.parse(autoSaved), uiRefs); }
-        catch (e) { console.warn("Auto-load failed", e); }
-      } else {
-        // 최초 기본값(제목/부제목 DOM)
-        setTitleDom(document.getElementById('chartTitle').innerText, 18);
-        setSubtitleDom("", 13, false);
+        try {
+          const saved = JSON.parse(autoSaved);
+          setTitleDom(br2nl(saved.title), saved.titleFontSize ?? 18);
+          setSubtitleDom(saved.subtitle ?? "", saved.subtitleFontSize ?? 13, !!saved.subtitleBold);
+
+          myChart.data.labels = saved.labels || [];
+          myChart.data.datasets = (saved.datasets || []).map(ds => padDatasetToLabels(ds, (saved.labels || []).length));
+
+          if (saved.yMin !== undefined && saved.yMin !== null && saved.yMin !== "") myChart.options.scales.y.min = saved.yMin;
+          else delete myChart.options.scales.y.min;
+          if (saved.yMax !== undefined && saved.yMax !== null && saved.yMax !== "") myChart.options.scales.y.max = saved.yMax;
+          else delete myChart.options.scales.y.max;
+
+          myChart.options.plugins.watermarkPlugin.enabled = !!saved.showWatermark;
+
+          applyAxisTitlesToChart(saved.xAxisTitle || "", saved.yAxisTitle || "", saved.xAxisTitleSize ?? 12, saved.yAxisTitleSize ?? 12);
+          applyTickFontsToChart(saved.xAxisFontSize ?? 12, saved.yAxisFontSize ?? 12);
+
+          myChart.update('none');
+          renderLegend();
+        } catch(e){
+          console.warn("Auto-load failed", e);
+        }
       }
 
-      // ✅ paste (excel)
+      // paste from excel
       dataTable.addEventListener('paste', (e) => {
         e.preventDefault();
         const clipboard = (e.clipboardData || window.clipboardData).getData('text');
         if (!clipboard) return;
-        const rows = clipboard.trim().split(/\r\n|\n|\r/);
 
+        const rows = clipboard.trim().split(/\r\n|\n|\r/);
         const tableRows = Array.from(dataTable.querySelectorAll('tbody tr'));
-        let activeInput = document.activeElement;
+
         let startRowIdx = 0;
         let startColIdx = 0;
+        const activeInput = document.activeElement;
 
         if (activeInput && activeInput.tagName === 'INPUT') {
           const td = activeInput.closest('td');
@@ -1164,42 +1056,44 @@
           let targetRow = tableRows[startRowIdx + rI];
 
           if (!targetRow) {
-            const lastRow = tableRows[tableRows.length - 1];
-            if (lastRow) {
-              const newRow = lastRow.cloneNode(true);
-              newRow.querySelectorAll('input').forEach(i => i.value = '');
-              dataTable.querySelector('tbody').appendChild(newRow);
-              targetRow = newRow;
-              tableRows.push(newRow);
+            const newRow = document.createElement('tr');
+            const colCount = dataTable.querySelectorAll('thead th').length;
+            for (let c=0;c<colCount;c++){
+              const td = document.createElement('td');
+              const inp = document.createElement('input');
+              inp.type = (c===0) ? 'text' : 'number';
+              td.appendChild(inp);
+              newRow.appendChild(td);
             }
+            dataTable.querySelector('tbody').appendChild(newRow);
+            targetRow = newRow;
+            tableRows.push(newRow);
           }
 
-          if (targetRow) {
-            const inputs = targetRow.querySelectorAll('input');
-            cells.forEach((val, cI) => {
-              const targetInput = inputs[startColIdx + cI];
-              if (!targetInput) return;
-              let safeVal = val.trim();
-              if (targetInput.type === 'number') safeVal = safeVal.replace(/[,%]/g, '');
-              targetInput.value = safeVal;
-            });
-          }
+          const inputs = targetRow.querySelectorAll('input');
+          cells.forEach((val, cI) => {
+            const targetInput = inputs[startColIdx + cI];
+            if (!targetInput) return;
+            let safeVal = val.trim();
+            if (targetInput.type === 'number') safeVal = safeVal.replace(/[,%]/g, '');
+            targetInput.value = safeVal;
+          });
         });
       });
 
-      // ===== buttons (edit + screenshot)
-      function setupButtons() {
+      // fixed buttons
+      (function setupButtons(){
         const editBtn = document.createElement("button");
         editBtn.innerText = "설정 및 데이터 수정";
         editBtn.style.cssText =
-          "position:fixed; top:20px; right:190px; z-index:9999; padding:10px 20px; background:#fff; color:#333; border:1px solid #ccc; border-radius:10px; cursor:pointer; font-weight:800; font-family:sans-serif; box-shadow:0 2px 8px rgba(0,0,0,0.12);";
+          "position:fixed; top:20px; right:190px; z-index:9999; padding:10px 20px; background:#fff; color:#333; border:1px solid #ccc; border-radius:10px; cursor:pointer; font-weight:800; box-shadow:0 2px 8px rgba(0,0,0,0.12);";
         editBtn.onclick = () => window.openEditor();
         document.body.appendChild(editBtn);
 
         const shotBtn = document.createElement("button");
         shotBtn.innerText = "스샷저장 (고화질)";
         shotBtn.style.cssText =
-          "position:fixed; top:20px; right:20px; z-index:9999; padding:10px 20px; background:#333; color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:800; font-family:sans-serif; box-shadow:0 2px 10px rgba(0,0,0,0.28);";
+          "position:fixed; top:20px; right:20px; z-index:9999; padding:10px 20px; background:#333; color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:800; box-shadow:0 2px 10px rgba(0,0,0,0.28);";
 
         shotBtn.onclick = async function () {
           if (!myChart) return;
@@ -1223,30 +1117,29 @@
             const safeTitle = sanitizeFilename(title) || "Chart";
             const defaultName = `${safeTitle}_${dateStr}_${timeStr}.png`;
 
-            let filename = prompt("이미지 파일 이름을 입력하세요:", defaultName);
-            if (!filename) throw new Error("cancel");
+            let filename = prompt("이미지 파일 이름:", defaultName);
+            if (!filename) return;
             if (!filename.endsWith('.png')) filename += '.png';
 
-            const SCALE_FACTOR = 3;
+            const SCALE = 3;
             const MARGIN = 50;
             const target = document.querySelector('.card');
-            if (!target) throw new Error("target not found");
 
-            myChart.options.devicePixelRatio = SCALE_FACTOR;
+            myChart.options.devicePixelRatio = SCALE;
             myChart.resize();
             myChart.update('none');
 
             await new Promise(r => setTimeout(r, 250));
 
             const canvas = await html2canvas(target, {
-              scale: SCALE_FACTOR,
+              scale: SCALE,
               backgroundColor: '#ffffff',
               logging: false,
               useCORS: true
             });
 
             const finalCanvas = document.createElement('canvas');
-            const m = MARGIN * SCALE_FACTOR;
+            const m = MARGIN * SCALE;
             finalCanvas.width = canvas.width + m * 2;
             finalCanvas.height = canvas.height + m * 2;
 
@@ -1261,7 +1154,7 @@
             a.click();
 
           } catch (err) {
-            if (err.message !== "cancel") alert("스크린샷 저장 실패: " + err.message);
+            alert("스크린샷 저장 실패: " + err.message);
           } finally {
             myChart.options.devicePixelRatio = prevDPR;
             myChart.options.plugins.tooltip.enabled = prevTooltipEnabled;
@@ -1272,14 +1165,14 @@
         };
 
         document.body.appendChild(shotBtn);
-      }
-      setupButtons();
+      })();
 
     } catch (err) {
       console.error(err);
-      alert("차트 초기화 실패: " + err.message + "\n(콘솔(F12)에서 에러 라인 확인해봐)");
+      alert("차트 초기화 실패: " + err.message + "\nF12 콘솔 에러 라인 캡처해서 보내면 바로 잡아줄게.");
     }
   });
+})();
 </script>
 </body>
 </html>
