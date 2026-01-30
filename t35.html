@@ -1146,7 +1146,22 @@
         editBtn.innerText = "설정 및 데이터 수정";
         editBtn.style.cssText =
           "position:fixed; top:20px; right:190px; z-index:9999; padding:10px 20px; background:#fff; color:#333; border:1px solid #ccc; border-radius:10px; cursor:pointer; font-weight:800; font-family:sans-serif; box-shadow:0 2px 8px rgba(0,0,0,0.12);";
-        editBtn.onclick = () => window.openEditor();
+editBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  try {
+    // 모달 강제 오픈
+    const modal = document.getElementById('editModal');
+    if (!modal) throw new Error('#editModal 없음');
+    modal.style.display = 'flex';
+
+    // 기존 openEditor도 실행 (테이블/시리즈 채우기용)
+    if (typeof window.openEditor === 'function') window.openEditor();
+  } catch (err) {
+    console.error(err);
+    alert('에디터 열기 실패: ' + err.message);
+  }
+});
         document.body.appendChild(editBtn);
 
         const shotBtn = document.createElement("button");
