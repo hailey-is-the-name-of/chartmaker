@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>최재호 - 달성군 다사 출마</title>
+    <style>
+        /* 기본 스타일 초기화 및 폰트 설정 */
+        :root {
+            --primary-color: #004ea2; /* 민주당 파란색 계열 */
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --accent-color: #0d6efd;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 헤더 스타일 */
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .menu a {
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .menu a:hover {
+            color: var(--primary-color);
+        }
+
+        /* 히어로 섹션 */
+        .hero {
+            margin-top: 70px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        .hero-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 500px;
+            object-fit: cover;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #003a7e;
+        }
+
+        /* 공통 섹션 스타일 */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .section-title p {
+            color: #666;
+        }
+
+        /* 공약 섹션 */
+        .pledges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .pledge-item {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        .pledge-item h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        /* 소개 섹션 */
+        .about-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .about-img {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .about-img img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .about-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .history-list li {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .history-list strong {
+            display: block;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        /* 로드맵 섹션 */
+        .roadmap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .roadmap-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .roadmap-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* 갤러리/뉴스 섹션 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .gallery-info {
+            padding: 15px;
+        }
+
+        .gallery-date {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .gallery-title {
+            font-size: 1rem;
+            margin-top: 5px;
+            font-weight: bold;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 연락처 및 푸터 */
+        .contact-info {
+            text-align: center;
+            background-color: #f1f3f5;
+            padding: 50px 0;
+        }
+
+        .contact-info p {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            margin: 0 10px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .nav-bar {
+                flex-direction: column;
+                height: auto;
+                padding: 10px 0;
+            }
+            .menu {
+                margin-top: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hero-content h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-bar">
+            <a href="#" class="logo">최재호 달성군의원 후보</a>
+            <nav class="menu">
+                <a href="#about">소개</a>
+                <a href="#pledges">공약</a>
+                <a href="#profile">약력</a>
+                <a href="#roadmap">로드맵</a>
+                <a href="#contact">연락하기</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container hero-content">
+            <p>다사의 안전과 미래를 책임지는 촘촘한 정책 일꾼</p>
+            <h1>현장에서 찾고, 예산으로 풀고,<br>전 세대를 보듬겠습니다!</h1>
+            <p><strong>다사를 위한 최재호의 약속</strong><br>주민과 함께하는 정치, 실천하는 최재호</p>
+            
+            <div style="margin-bottom: 30px;">
+                <a href="#pledges" class="btn">5대 핵심 공약 보기</a>
+                <a href="#contact" class="btn" style="background-color: #fff; color: var(--primary-color); border: 1px solid var(--primary-color); margin-left: 10px;">연락하기</a>
+            </div>
+
+            <img src="https://xn--4k0bs6uhwv.kr/theme/rb.basic/rb.layout/basic/kim3.jpg" alt="최재호 후보" class="hero-img">
+            
+            <div style="margin-top: 20px;">
+                <p>📍 대구광역시 달성군 다사읍</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="pledges">
+        <div class="container">
+            <div class="section-title">
+                <h2>5대 핵심 의정과제</h2>
+                <p>생애주기별 맞춤형 복지망 구축</p>
+            </div>
+            <div class="pledges-grid">
+                <div class="pledge-item">
+                    <h3>01 복지 & 치유</h3>
+                    <p><strong>2026 통합돌봄 대응 및 '다사형 치유농업' 전면 도입</strong><br>
+                    계명대 동산병원 협력 고위험 어르신 신속 진료, 다사보건지소 통합돌봄 창구 운영, '건강빵빵이' 배치</p>
+                </div>
+                <div class="pledge-item">
+                    <h3>02 청소년</h3>
+                    <p><strong>교육·문화 지원 대폭 강화</strong><br>
+                    공공시설 유휴 공간 활용 '안심 공부방' 및 '심야 공부 공간' 조성, 청소년 전용 문화센터 확충</p>
+                </div>
+                <div class="pledge-item">
+                    <h3>03 중장년</h3>
+                    <p><strong>'인생 이모작' 재취업 지원</strong><br>
+                    맞춤형 일자리 매칭, 전직 지원 컨설팅, '다사 50플러스' 평생학습 강좌 개설</p>
+                </div>
+                <div class="pledge-item">
+                    <h3>04 인프라</h3>
+                    <p><strong>지방정원 접근성 강화 및 주차난 해결</strong><br>
+                    세천늪 테마정원 전용 주차 공간 확충, 다사공영주차장 조기 완공 지원</p>
+                </div>
+                <div class="pledge-item">
+                    <h3>05 안전 & 교통</h3>
+                    <p><strong>생명을 지키는 안전망과 이동권 보장</strong><br>
+                    저수지 안전 펜스/CCTV 설치, '다사형 돌봄 마을버스' 순환 노선 확충</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" style="background-color: #f9f9f9;">
+        <div class="container">
+            <div class="section-title">
+                <h2>후보자 소개</h2>
+                <p>다사가 키운 정책 전문가, 최재호입니다.</p>
+            </div>
+            <div class="about-content">
+                <div class="about-img">
+                    <img src="https://xn--4k0bs6uhwv.kr/theme/rb.basic/rb.layout/basic/kim.jpg" alt="최재호 프로필">
+                </div>
+                <div class="about-text">
+                    <ul class="history-list" id="profile">
+                        <li>
+                            <strong>현재</strong>
+                            더불어민주당 달성군 지역위원회 사무국장<br>
+                            지역 정치 실무 경험 및 정책 역량 강화
+                        </li>
+                        <li>
+                            <strong>자격</strong>
+                            1급 퍼실리테이터<br>
+                            현장 소통 능력과 갈등 조정 전문성 보유
+                        </li>
+                        <li>
+                            <strong>활동</strong>
+                            청소년봉사단체 사무국장<br>
+                            미래 세대를 위한 정책 경험 축적
+                        </li>
+                        <li>
+                            <strong>거주</strong>
+                            달성군 다사읍 거주<br>
+                            지역 현안을 누구보다 잘 아는 주민
+                        </li>
+                    </ul>
+                    <div style="margin-top: 30px; padding: 20px; background: white; border-radius: 5px;">
+                        <p style="font-style: italic; color: #555;">
+                            "청소년봉사단체 사무국장으로서 <strong>미래</strong>를,<br>
+                            중장년의 고뇌를 아는 동료로서 <strong>현재</strong>를,<br>
+                            어르신을 모시는 전문가로서 <strong>과거</strong>를 잇겠습니다."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap">
+        <div class="container">
+            <div class="section-title">
+                <h2>의정 활동 로드맵</h2>
+                <p>4개년 실행 계획</p>
+            </div>
+            <div class="roadmap-grid">
+                <div class="roadmap-item">
+                    <h4>1년차: 기반 구축</h4>
+                    <p>건강빵빵이 운영 확대 조례<br>저수지 안전 조례 제정<br>안심 공부방 부지 확보</p>
+                </div>
+                <div class="roadmap-item">
+                    <h4>2년차: 시범 운영</h4>
+                    <p>2026 통합돌봄 시스템 가동<br>'50+ 인생 강좌' 개설<br>치유농업 시범 사업</p>
+                </div>
+                <div class="roadmap-item">
+                    <h4>3년차: 시설 완공</h4>
+                    <p>2027년 다사공영주차장 완공<br>지방정원 주차장 완공<br>똑똑 버스(DRT) 도입</p>
+                </div>
+                <div class="roadmap-item">
+                    <h4>4년차: 성과 확산</h4>
+                    <p>세대 통합형 촘촘 돌봄망 완성<br>생애주기별 맞춤형 복지 모델화</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="news" style="background-color: #fff;">
+        <div class="container">
+            <div class="section-title">
+                <h2>활동 소식</h2>
+                <p>현장의 목소리를 듣습니다</p>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="https://xn--4k0bs6uhwv.kr/data/file/gallery/thumb-1926141098_69805e9c7b4a0_KakaoTalk_20260130_100329898_220x280.png" alt="활동사진1">
+                    <div class="gallery-info">
+                        <div class="gallery-date">2026년 2월</div>
+                        <div class="gallery-title">달탐사 세 번째 이야기 by 달성군 출마예정자 최재호</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://xn--4k0bs6uhwv.kr/data/file/gallery/thumb-1926141098_697f0d0dbbf62_KakaoTalk_20260131_230430924_02_220x280.jpg" alt="활동사진2">
+                    <div class="gallery-info">
+                        <div class="gallery-date">2026년 2월</div>
+                        <div class="gallery-title">대실역에서 만난 다사의 진심 - 최재호</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://xn--4k0bs6uhwv.kr/data/file/gallery/thumb-1926141098_697b6b685313a______________220x280.jpg" alt="표창패">
+                    <div class="gallery-info">
+                        <div class="gallery-date">2026년 1월</div>
+                        <div class="gallery-title">대구광역시 제2기 시정모니터활동 대구시장 표창패</div>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://xn--4k0bs6uhwv.kr/data/file/gallery/thumb-1926141098_697b6a633ceb3________________________________________23.12.21__220x280.jpg" alt="감사패">
+                    <div class="gallery-info">
+                        <div class="gallery-date">2026년 1월</div>
+                        <div class="gallery-title">예산바로쓰기 감시단 감사패 수상</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact-info">
+        <div class="container">
+            <h2>주민 여러분의 목소리를 들려주세요</h2>
+            <p>지역 발전을 위한 아이디어, 건의사항 언제든 환영합니다</p>
+            <br>
+            <p>📞 <strong>전화:</strong> 010-7249-2376</p>
+            <p>✉️ <strong>이메일:</strong> skrkwk2000@hanmail.net</p>
+            <p>📍 <strong>선거사무소:</strong> 대구 달성군 다사읍</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <h3>최재호 달성군의원 후보</h3>
+            <p>다사가 키운 정책 전문가 최재호, 이제 결과로 보답하겠습니다!</p>
+            <div class="footer-links" style="margin: 20px 0;">
+                <a href="#">유튜브</a>
+                <a href="#">페이스북</a>
+                <a href="#">블로그</a>
+            </div>
+            <p style="font-size: 0.8rem; color: #777;">
+                © 2026 최재호 달성군의원 후보 캠프. All rights reserved.<br>
+                이 홈페이지는 선거운동 기간에만 운영됩니다.
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
