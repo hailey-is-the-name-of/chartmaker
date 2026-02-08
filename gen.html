@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>캠프 홈페이지 생성기</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --primary:#004ea2;
+      --bg:#0b1220;
+      --panel:#0f1a30;
+      --card:#111f3a;
+      --text:#eaf0ff;
+      --muted:#aab6d6;
+      --line:rgba(255,255,255,.12);
+      --good:#2ecc71;
+      --warn:#f1c40f;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Noto Sans KR', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:linear-gradient(180deg, #070b14, var(--bg));
+      color:var(--text);
+    }
+    a{color:inherit}
+    .wrap{max-width:1280px;margin:0 auto;padding:24px}
+    .top{
+      display:flex; gap:14px; align-items:center; justify-content:space-between;
+      margin-bottom:18px;
+    }
+    .title{
+      display:flex;flex-direction:column;gap:6px;
+    }
+    .title h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.2px}
+    .title p{margin:0;color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    button{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:13px;
+    }
+    button.primary{
+      background:var(--primary);
+      border-color:transparent;
+    }
+    button.good{
+      background:rgba(46,204,113,.18);
+      border-color:rgba(46,204,113,.4);
+    }
+    button.warn{
+      background:rgba(241,196,15,.16);
+      border-color:rgba(241,196,15,.4);
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    .panel{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+    }
+    .panel .hd{
+      padding:14px 14px;
+      border-bottom:1px solid var(--line);
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0));
+    }
+    .panel .hd b{font-size:14px}
+    .panel .bd{padding:14px}
+    .hint{color:var(--muted);font-size:12px;line-height:1.5}
+    .sec{margin-bottom:18px}
+    .sec:last-child{margin-bottom:0}
+    .sec h3{margin:0 0 10px;font-size:14px}
+    .row{
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap:10px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    .row label{font-size:12px;color:var(--muted);font-weight:800}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      outline:none;
+      font-size:13px;
+    }
+    textarea{min-height:70px;resize:vertical}
+    .table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:12px;
+      border:1px solid var(--line);
+    }
+    .table th, .table td{
+      border-bottom:1px solid var(--line);
+      padding:10px 8px;
+      vertical-align:top;
+      font-size:12px;
+    }
+    .table th{
+      color:var(--muted);
+      text-align:left;
+      font-weight:900;
+      background:rgba(255,255,255,.04);
+    }
+    .table tr:last-child td{border-bottom:none}
+    .mini{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    }
+    .mini button{padding:8px 10px;border-radius:10px;font-weight:900}
+    .fileline{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .fileline code{
+      padding:6px 8px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:var(--muted);
+      font-size:12px;
+    }
+    .previewWrap{
+      height: calc(100vh - 140px);
+      min-height:620px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+    }
+    iframe{width:100%;height:100%;border:0;background:#fff}
+    .pill{
+      font-size:11px;
+      font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      background:rgba(255,255,255,.03);
+      white-space:nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="title">
+        <h1>캠프 홈페이지 생성기</h1>
+        <p>테이블에 내용 입력 → 이미지 파일 선택(파일명 기준) → <span class="pill">/images/파일명</span> 자동 적용 → 풀코드 다운로드</p>
+      </div>
+      <div class="actions">
+        <button class="primary" id="btnRender">미리보기 갱신</button>
+        <button class="good" id="btnDownload">generated.html 다운로드</button>
+        <button class="warn" id="btnCopy">HTML 복사</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: EDITOR -->
+      <div class="panel">
+        <div class="hd">
+          <b>입력 테이블 (내용/이미지 경로)</b>
+          <span class="pill">정적 사이트 / GitHub Pages OK</span>
+        </div>
+        <div class="bd">
+
+          <div class="sec">
+            <h3>기본 정보</h3>
+            <div class="row">
+              <label>브라우저 탭 제목</label>
+              <input id="siteTitle" value="최재호 - 달성군 다사 출마" />
+            </div>
+            <div class="row">
+              <label>헤더 로고(이름)</label>
+              <input id="candidateName" value="최재호" />
+            </div>
+            <div class="row">
+              <label>헤더 배지(직함)</label>
+              <input id="candidateBadge" value="달성군의원 후보" />
+            </div>
+            <div class="row">
+              <label>히어로 배지</label>
+              <input id="heroBadge" value="달성군 다사 출마" />
+            </div>
+            <div class="row">
+              <label>히어로 메인(줄바꿈은 &lt;br&gt;)</label>
+              <textarea id="heroTitle">현장에서 찾고, 예산으로 풀고,<br>전 세대를 보듬겠습니다!</textarea>
+            </div>
+            <div class="row">
+              <label>히어로 강조 문구</label>
+              <input id="heroHighlight" value="전 세대를 보듬겠습니다!" />
+            </div>
+            <div class="row">
+              <label>히어로 설명</label>
+              <textarea id="heroDesc">다사의 안전과 미래를 책임지는 촘촘한 정책 일꾼<br>주민과 함께하는 정치, 실천하는 <strong>최재호</strong>입니다.</textarea>
+            </div>
+
+            <div class="row">
+              <label>히어로 이미지</label>
+              <div class="fileline">
+                <input type="file" id="heroImageFile" accept="image/*" />
+                <code id="heroImagePath">/images/kim3.jpg</code>
+              </div>
+            </div>
+
+            <div class="row">
+              <label>소개 이미지</label>
+              <div class="fileline">
+                <input type="file" id="aboutImageFile" accept="image/*" />
+                <code id="aboutImagePath">/images/kim.jpg</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec">
+            <h3>공약(5대 핵심 의정과제)</h3>
+            <p class="hint">아이콘은 Font Awesome 클래스명(예: fas fa-heartbeat). 내용은 HTML 허용.</p>
+            <table class="table" id="pledgeTable">
+              <thead>
+                <tr>
+                  <th style="width:70px">번호</th>
+                  <th style="width:180px">아이콘 클래스</th>
+                  <th style="width:170px">제목</th>
+                  <th>설명(HTML 가능)</th>
+                  <th style="width:110px">삭제</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="mini" style="margin-top:10px">
+              <button id="addPledge">+ 공약 추가</button>
+              <span class="hint">원하면 5개 이상도 가능</span>
+            </div>
+          </div>
+
+          <div class="sec">
+            <h3>후보 소개(프로필 리스트)</h3>
+            <table class="table" id="profileTable">
+              <thead>
+                <tr>
+                  <th style="width:110px">라벨</th>
+                  <th>내용</th>
+                  <th>설명(작게)</th>
+                  <th style="width:110px">삭제</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="mini" style="margin-top:10px">
+              <button id="addProfile">+ 항목 추가</button>
+            </div>
+
+            <div class="row" style="margin-top:12px">
+              <label>소개 인용문(HTML 가능)</label>
+              <textarea id="quoteBox">"청소년봉사단체 사무국장으로서 <strong>미래</strong>를, 중장년의 고뇌를 아는 동료로서 <strong>현재</strong>를, 어르신을 모시는 전문가로서 <strong>과거</strong>를 잇겠습니다."</textarea>
+            </div>
+          </div>
+
+          <div class="sec">
+            <h3>로드맵(연차별)</h3>
+            <table class="table" id="roadmapTable">
+              <thead>
+                <tr>
+                  <th style="width:120px">원형 텍스트</th>
+                  <th style="width:160px">소제목</th>
+                  <th>항목(줄바꿈은 \\n)</th>
+                  <th style="width:110px">삭제</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="mini" style="margin-top:10px">
+              <button id="addRoadmap">+ 로드맵 추가</button>
+            </div>
+          </div>
+
+          <div class="sec">
+            <h3>활동 소식(갤러리)</h3>
+            <p class="hint">이미지는 파일 선택하면 자동으로 <span class="pill">/images/파일명</span> 적용됨(레포 images 폴더에 넣기).</p>
+            <table class="table" id="newsTable">
+              <thead>
+                <tr>
+                  <th style="width:110px">날짜</th>
+                  <th style="width:220px">이미지</th>
+                  <th>제목</th>
+                  <th style="width:110px">삭제</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="mini" style="margin-top:10px">
+              <button id="addNews">+ 소식 추가</button>
+            </div>
+          </div>
+
+          <div class="sec">
+            <h3>연락처</h3>
+            <div class="row">
+              <label>전화</label>
+              <input id="phone" value="010-7249-2376" />
+            </div>
+            <div class="row">
+              <label>이메일</label>
+              <input id="email" value="skrkwk2000@hanmail.net" />
+            </div>
+            <div class="row">
+              <label>지역</label>
+              <input id="region" value="대구 달성군 다사읍" />
+            </div>
+          </div>
+
+          <div class="sec">
+            <h3>SNS 링크</h3>
+            <p class="hint">유튜브/페북/블로그 등 href 넣기. 비워두면 버튼 안 뜸.</p>
+            <div class="row">
+              <label>YouTube</label>
+              <input id="snsYoutube" value="#" />
+            </div>
+            <div class="row">
+              <label>Facebook</label>
+              <input id="snsFacebook" value="#" />
+            </div>
+            <div class="row">
+              <label>Blog</label>
+              <input id="snsBlog" value="#" />
+            </div>
+          </div>
+
+          <div class="sec">
+            <h3>푸터 문구</h3>
+            <textarea id="footerText"><strong>최재호 달성군의원 후보</strong><br>
+© 2026 최재호 달성군의원 후보 캠프. All rights reserved.<br>
+이 홈페이지는 선거운동 기간에만 운영됩니다.</textarea>
+          </div>
+
+          <div class="sec">
+            <h3>참고</h3>
+            <p class="hint">
+              1) “미리보기 갱신” 누르면 오른쪽 프리뷰가 업데이트됨<br>
+              2) “generated.html 다운로드” 받은 파일을 <b>별도 레포</b>로 올리거나, 같은 레포에 넣고 GitHub Pages로 배포하면 끝<br>
+              3) 이미지 파일은 반드시 repo의 <b>/images/</b> 폴더에 넣어야 경로가 맞음
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT: PREVIEW -->
+      <div class="panel">
+        <div class="hd">
+          <b>미리보기</b>
+          <span class="pill">iframe srcdoc</span>
+        </div>
+        <div class="bd">
+          <div class="previewWrap">
+            <iframe id="preview" title="preview"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Font Awesome (미리보기/생성 HTML에서 사용) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+  <script>
+    // --------- 기본 데이터(형님이 준 HTML 기준) ----------
+    const state = {
+      pledges: [
+        {
+          icon: "fas fa-heartbeat",
+          title: "복지 & 치유",
+          desc: "<strong>2026 통합돌봄 대응 및 '다사형 치유농업' 전면 도입</strong><br>계명대 동산병원 협력 고위험 어르신 신속 진료, 다사보건지소 통합돌봄 창구 운영"
+        },
+        {
+          icon: "fas fa-graduation-cap",
+          title: "청소년",
+          desc: "<strong>교육·문화 지원 대폭 강화</strong><br>공공시설 유휴 공간 활용 '안심 공부방' 및 '심야 공부 공간' 조성, 청소년 전용 문화센터 확충"
+        },
+        {
+          icon: "fas fa-briefcase",
+          title: "중장년",
+          desc: "<strong>'인생 이모작' 재취업 지원</strong><br>맞춤형 일자리 매칭, 전직 지원 컨설팅, '다사 50플러스' 평생학습 강좌 개설"
+        },
+        {
+          icon: "fas fa-parking",
+          title: "인프라",
+          desc: "<strong>지방정원 접근성 강화 및 주차난 해결</strong><br>세천늪 테마정원 전용 주차 공간 확충, 다사공영주차장 조기 완공 지원"
+        },
+        {
+          icon: "fas fa-shield-alt",
+          title: "안전 & 교통",
+          desc: "<strong>생명을 지키는 안전망과 이동권 보장</strong><br>저수지 안전 펜스/CCTV 설치, '다사형 돌봄 마을버스' 순환 노선 확충"
+        }
+      ],
+      profiles: [
+        { label: "현재", cont: "더불어민주당 달성군 지역위원회 사무국장", desc: "지역 정치 실무 경험 및 정책 역량 강화" },
+        { label: "자격", cont: "1급 퍼실리테이터", desc: "현장 소통 능력과 갈등 조정 전문성 보유" },
+        { label: "활동", cont: "청소년봉사단체 사무국장", desc: "미래 세대를 위한 정책 경험 축적" }
+      ],
+      roadmap: [
+        { circle: "1년차", title: "기반 구축", items: ["건강빵빵이 운영 확대 조례", "저수지 안전 조례 제정", "안심 공부방 부지 확보"] },
+        { circle: "2년차", title: "시범 운영", items: ["2026 통합돌봄 시스템 가동", "'50+ 인생 강좌' 개설", "치유농업 시범 사업 실시"] },
+        { circle: "3년차", title: "시설 완공", items: ["2027년 다사공영주차장 완공", "지방정원 주차장 완공", "똑똑 버스(DRT) 도입"] },
+        { circle: "4년차", title: "성과 확산", items: ["세대 통합형 돌봄망 완성", "생애주기별 복지 모델화", "전국 모범 사례화"] }
+      ],
+      news: [
+        { date: "2026.02", img: "/images/news1.png", title: "달탐사 세 번째 이야기 by 달성군 출마예정자 최재호" },
+        { date: "2026.02", img: "/images/news2.jpg", title: "대실역에서 만난 다사의 진심 - 최재호" },
+        { date: "2026.01", img: "/images/news3.jpg", title: "대구광역시 제2기 시정모니터활동 대구시장 표창패 수상" },
+        { date: "2026.01", img: "/images/news4.jpg", title: "예산바로쓰기 감시단 감사패 수상 (행정안전부장관)" }
+      ],
+      // 이미지 초기값
+      heroImg: "/images/kim3.jpg",
+      aboutImg: "/images/kim.jpg"
+    };
+
+    // --------- 유틸 ----------
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+    const nlToLis = (text) => String(text ?? "").split("\\n").map(x => x.trim()).filter(Boolean);
+
+    function setPathFromFile(fileInput, codeEl, onSet){
+      const f = fileInput.files && fileInput.files[0];
+      if(!f) return;
+      const path = `/images/${f.name}`;
+      codeEl.textContent = path;
+      onSet(path);
+    }
+
+    // --------- 테이블 렌더 ----------
+    function renderPledgeTable(){
+      const tbody = $("pledgeTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      state.pledges.forEach((p, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${String(i+1).padStart(2,"0")}</td>
+          <td><input data-k="icon" data-i="${i}" value="${esc(p.icon)}"></td>
+          <td><input data-k="title" data-i="${i}" value="${esc(p.title)}"></td>
+          <td><textarea data-k="desc" data-i="${i}">${esc(p.desc)}</textarea></td>
+          <td><button data-del="pledge" data-i="${i}">삭제</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderProfileTable(){
+      const tbody = $("profileTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      state.profiles.forEach((p, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input data-k="label" data-i="${i}" value="${esc(p.label)}"></td>
+          <td><input data-k="cont" data-i="${i}" value="${esc(p.cont)}"></td>
+          <td><input data-k="desc" data-i="${i}" value="${esc(p.desc)}"></td>
+          <td><button data-del="profile" data-i="${i}">삭제</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderRoadmapTable(){
+      const tbody = $("roadmapTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      state.roadmap.forEach((r, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input data-k="circle" data-i="${i}" value="${esc(r.circle)}"></td>
+          <td><input data-k="title" data-i="${i}" value="${esc(r.title)}"></td>
+          <td><textarea data-k="items" data-i="${i}">${esc(r.items.join("\\n"))}</textarea></td>
+          <td><button data-del="roadmap" data-i="${i}">삭제</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderNewsTable(){
+      const tbody = $("newsTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      state.news.forEach((n, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input data-k="date" data-i="${i}" value="${esc(n.date)}"></td>
+          <td>
+            <div class="fileline">
+              <input type="file" accept="image/*" data-newsfile="${i}">
+              <code data-newspath="${i}">${esc(n.img)}</code>
+            </div>
+          </td>
+          <td><input data-k="title" data-i="${i}" value="${esc(n.title)}"></td>
+          <td><button data-del="news" data-i="${i}">삭제</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAllTables(){
+      renderPledgeTable();
+      renderProfileTable();
+      renderRoadmapTable();
+      renderNewsTable();
+      // 이미지 경로 표시
+      $("heroImagePath").textContent = state.heroImg;
+      $("aboutImagePath").textContent = state.aboutImg;
+    }
+
+    // --------- 입력값 -> state 반영 ----------
+    function bindTableEvents(){
+      // 공통: input/textarea 변경
+      document.addEventListener("input", (e) => {
+        const el = e.target;
+        const k = el.getAttribute("data-k");
+        const i = el.getAttribute("data-i");
+        if(k == null || i == null) return;
+
+        // 어느 테이블인지 판별(부모 id로)
+        const table = el.closest("table")?.id;
+        const idx = Number(i);
+
+        if(table === "pledgeTable"){
+          state.pledges[idx][k] = el.value;
+        } else if(table === "profileTable"){
+          state.profiles[idx][k] = el.value;
+        } else if(table === "roadmapTable"){
+          if(k === "items") state.roadmap[idx].items = nlToLis(el.value);
+          else state.roadmap[idx][k] = el.value;
+        } else if(table === "newsTable"){
+          state.news[idx][k] = el.value;
+        }
+      });
+
+      // 삭제 버튼
+      document.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if(!btn) return;
+        const kind = btn.getAttribute("data-del");
+        const i = btn.getAttribute("data-i");
+        if(!kind || i == null) return;
+        const idx = Number(i);
+
+        if(kind === "pledge") state.pledges.splice(idx,1);
+        if(kind === "profile") state.profiles.splice(idx,1);
+        if(kind === "roadmap") state.roadmap.splice(idx,1);
+        if(kind === "news") state.news.splice(idx,1);
+
+        renderAllTables();
+        renderPreview();
+      });
+
+      // 뉴스 이미지 파일 선택
+      document.addEventListener("change", (e) => {
+        const el = e.target;
+        const nidx = el.getAttribute && el.getAttribute("data-newsfile");
+        if(nidx == null) return;
+        const idx = Number(nidx);
+        const f = el.files && el.files[0];
+        if(!f) return;
+        state.news[idx].img = `/images/${f.name}`;
+        // 코드 표시 업데이트
+        const code = document.querySelector(`code[data-newspath="${idx}"]`);
+        if(code) code.textContent = state.news[idx].img;
+        renderPreview();
+      });
+    }
+
+    // --------- 생성 HTML ----------
+    function buildGeneratedHtml(){
+      const siteTitle = $("siteTitle").value.trim() || "캠프 홈페이지";
+      const candidateName = $("candidateName").value.trim() || "후보";
+      const candidateBadge = $("candidateBadge").value.trim() || "후보";
+      const heroBadge = $("heroBadge").value.trim();
+      const heroTitle = $("heroTitle").value.trim();
+      const heroDesc = $("heroDesc").value.trim();
+      const quoteBox = $("quoteBox").value.trim();
+      const phone = $("phone").value.trim();
+      const email = $("email").value.trim();
+      const region = $("region").value.trim();
+      const footerText = $("footerText").value.trim();
+      const snsYoutube = $("snsYoutube").value.trim();
+      const snsFacebook = $("snsFacebook").value.trim();
+      const snsBlog = $("snsBlog").value.trim();
+
+      const pledgesHtml = state.pledges.map((p, i) => `
+        <div class="card reveal ${i===1?'delay-100':i===2?'delay-200':i===3?'delay-300':i===4?'delay-400':''}">
+          <div class="card-num">${String(i+1).padStart(2,"0")}</div>
+          <div class="card-icon"><i class="${p.icon}"></i></div>
+          <h3>${p.title}</h3>
+          <p>${p.desc}</p>
+        </div>
+      `).join("");
+
+      const profileHtml = state.profiles.map(p => `
+        <li>
+          <span class="profile-label">${p.label}</span>
+          <div class="profile-cont">
+            ${p.cont}
+            <span class="profile-desc">${p.desc}</span>
+          </div>
+        </li>
+      `).join("");
+
+      const roadmapHtml = state.roadmap.map((r,i) => `
+        <div class="step reveal ${i===1?'delay-100':i===2?'delay-200':i===3?'delay-300':''}">
+          <div class="step-circle">${r.circle}</div>
+          <h4>${r.title}</h4>
+          <ul>
+            ${r.items.map(x=>`<li>${x}</li>`).join("")}
+          </ul>
+        </div>
+      `).join("");
+
+      const newsHtml = state.news.map((n,i)=>`
+        <div class="gallery-item reveal ${i===1?'delay-100':i===2?'delay-200':i===3?'delay-300':''}">
+          <div class="thumb">
+            <img src="${n.img}" alt="활동${i+1}">
+          </div>
+          <div class="gallery-info">
+            <span class="date">${n.date}</span>
+            <div class="title">${n.title}</div>
+          </div>
+        </div>
+      `).join("");
+
+      const snsHtml = [
+        snsYoutube && snsYoutube !== "#" ? `<a href="${snsYoutube}" target="_blank" rel="noopener"><i class="fab fa-youtube"></i></a>` : `<a href="#"><i class="fab fa-youtube"></i></a>`,
+        snsFacebook && snsFacebook !== "#" ? `<a href="${snsFacebook}" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>` : `<a href="#"><i class="fab fa-facebook-f"></i></a>`,
+        snsBlog && snsBlog !== "#" ? `<a href="${snsBlog}" target="_blank" rel="noopener"><i class="fas fa-blog"></i></a>` : `<a href="#"><i class="fas fa-blog"></i></a>`,
+      ].join("");
+
+      // NOTE: 아래 템플릿은 형님이 준 디자인/구조 거의 그대로 유지
+      return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${esc(siteTitle)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { --primary:#004ea2; --primary-dark:#003a78; --text-main:#222; --text-sub:#666; --bg-light:#f8f9fa; --border:#e1e1e1; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Noto Sans KR',sans-serif;color:var(--text-main);line-height:1.6;word-break:keep-all;overflow-x:hidden}
+    a{text-decoration:none;color:inherit} ul{list-style:none} img{max-width:100%;display:block}
+    .container{max-width:1200px;margin:0 auto;padding:0 20px}
+    .reveal{opacity:0;transform:translateY(50px);transition:all .8s cubic-bezier(.5,0,0,1)}
+    .reveal.active{opacity:1;transform:translateY(0)}
+    .delay-100{transition-delay:.1s}.delay-200{transition-delay:.2s}.delay-300{transition-delay:.3s}.delay-400{transition-delay:.4s}
+
+    header{position:fixed;top:0;left:0;width:100%;height:80px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,.05);z-index:1000;display:flex;align-items:center}
+    .header-inner{display:flex;justify-content:space-between;align-items:center;width:100%}
+    .logo{font-size:1.5rem;font-weight:900;color:var(--primary);display:flex;align-items:center;gap:10px}
+    .logo span{font-size:1rem;font-weight:500;color:var(--text-main);background:#eee;padding:2px 8px;border-radius:4px}
+    .gnb{display:flex;gap:30px}
+    .gnb a{font-size:1.1rem;font-weight:500;padding:10px 0;position:relative}
+    .gnb a:hover,.gnb a.active{color:var(--primary)}
+    .gnb a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:3px;background:var(--primary);transition:width .3s}
+    .gnb a:hover::after{width:100%}
+
+    .mobile-btn{display:none;font-size:1.5rem;cursor:pointer}
+    .mobile-menu{display:none;position:fixed;top:80px;left:0;right:0;background:#fff;border-bottom:1px solid rgba(0,0,0,.06);z-index:999}
+    .mobile-menu a{display:block;padding:14px 20px;border-top:1px solid rgba(0,0,0,.06);font-weight:700}
+    .mobile-menu a:hover{background:#f5f7fa;color:var(--primary)}
+
+    .hero{margin-top:80px;padding:80px 0;background:linear-gradient(105deg,#f5f7fa 0%,#eef2f5 100%);position:relative;overflow:hidden}
+    .hero-wrap{display:flex;align-items:center;justify-content:space-between;gap:40px}
+    .hero-text{flex:1;z-index:1}
+    .hero-badge{display:inline-block;background:var(--primary);color:#fff;padding:5px 15px;border-radius:50px;font-weight:700;margin-bottom:20px;font-size:.9rem}
+    .hero-title{font-size:3rem;font-weight:900;line-height:1.2;margin-bottom:20px;color:#111}
+    .hero-title span{color:var(--primary)}
+    .hero-desc{font-size:1.25rem;color:var(--text-sub);margin-bottom:40px}
+    .hero-btns{display:flex;gap:15px}
+    .btn{padding:15px 30px;border-radius:5px;font-weight:700;font-size:1rem;transition:all .3s;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+    .btn-primary{background:var(--primary);color:#fff;border:1px solid var(--primary);box-shadow:0 4px 15px rgba(0,78,162,.3)}
+    .btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px)}
+    .btn-outline{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+    .btn-outline:hover{background:#f0f7ff;transform:translateY(-2px)}
+    .hero-img{flex:.8;position:relative}
+    .hero-img img{width:100%;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,.1);object-fit:cover}
+
+    section{padding:100px 0}
+    .sec-title{text-align:center;margin-bottom:60px}
+    .sec-title h2{font-size:2.2rem;font-weight:800;margin-bottom:10px;color:#111}
+    .sec-title h2::after{content:'';display:block;width:50px;height:4px;background:var(--primary);margin:20px auto 0}
+    .sec-title p{font-size:1.1rem;color:var(--text-sub)}
+
+    .pledge-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px}
+    .card{background:#fff;padding:40px 30px;border-radius:15px;border:1px solid #f0f0f0;box-shadow:0 10px 30px rgba(0,0,0,.03);transition:all .3s ease;position:relative;overflow:hidden;height:100%}
+    .card:hover{transform:translateY(-10px);box-shadow:0 15px 40px rgba(0,0,0,.08);border-color:var(--primary)}
+    .card-num{font-size:4rem;font-weight:900;color:#f0f0f0;position:absolute;top:20px;right:20px;line-height:1;z-index:0}
+    .card-icon{font-size:2rem;color:var(--primary);margin-bottom:20px;position:relative;z-index:1}
+    .card h3{font-size:1.4rem;margin-bottom:15px;font-weight:700;position:relative;z-index:1}
+    .card p{color:var(--text-sub);font-size:.95rem;position:relative;z-index:1}
+
+    .bg-gray{background:var(--bg-light)}
+    .about-wrap{display:flex;align-items:center;gap:60px}
+    .about-img{flex:1}
+    .about-img img{border-radius:10px;box-shadow:0 15px 30px rgba(0,0,0,.1)}
+    .about-txt{flex:1.2}
+    .about-txt h3{font-size:1.8rem;margin-bottom:30px;color:var(--primary)}
+    .profile-list li{display:flex;margin-bottom:20px;border-bottom:1px solid #eee;padding-bottom:20px}
+    .profile-list li:last-child{border-bottom:none}
+    .profile-label{width:80px;font-weight:700;color:var(--primary);flex-shrink:0}
+    .profile-cont{font-weight:400;color:#333}
+    .profile-desc{display:block;font-size:.9rem;color:#888;margin-top:5px}
+    .quote-box{background:#fff;padding:30px;border-radius:10px;margin-top:30px;border-left:5px solid var(--primary);font-style:italic;color:#555;box-shadow:0 5px 15px rgba(0,0,0,.05)}
+
+    .roadmap-wrap{display:flex;justify-content:space-between;position:relative;gap:20px}
+    .roadmap-wrap::before{content:'';position:absolute;top:40px;left:50px;right:50px;height:2px;background:#ddd;z-index:0}
+    .step{position:relative;z-index:1;background:#fff;text-align:center;flex:1;padding:20px;border-radius:10px;transition:transform .3s}
+    .step:hover{transform:translateY(-5px)}
+    .step-circle{width:80px;height:80px;background:#fff;border:3px solid var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-weight:900;color:var(--primary);font-size:1.2rem;box-shadow:0 0 0 10px #fff}
+    .step:hover .step-circle{background:var(--primary);color:#fff}
+    .step h4{font-size:1.2rem;margin-bottom:15px}
+    .step ul{text-align:left;font-size:.9rem;color:#666;padding-left:20px}
+    .step ul li{margin-bottom:5px;list-style:disc}
+
+    .gallery-list{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+    .gallery-item{border-radius:10px;overflow:hidden;border:1px solid #eee;transition:transform .3s;cursor:pointer;background:#fff}
+    .gallery-item:hover{transform:translateY(-5px);box-shadow:0 10px 20px rgba(0,0,0,.1)}
+    .thumb{width:100%;height:200px;overflow:hidden}
+    .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+    .gallery-item:hover .thumb img{transform:scale(1.1)}
+    .gallery-info{padding:20px}
+    .date{font-size:.8rem;color:var(--primary);font-weight:700;margin-bottom:8px;display:block}
+    .title{font-size:1rem;font-weight:700;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.8em;color:#333}
+
+    .contact-sec{background:#2c3e50;color:#fff;text-align:center}
+    .contact-sec h2,.contact-sec p{color:#fff}
+    .contact-sec .sec-title h2::after{background:#fff}
+    .contact-grid{display:flex;justify-content:center;gap:50px;margin-top:40px}
+    .contact-item{display:flex;flex-direction:column;align-items:center}
+    .contact-icon{width:60px;height:60px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:15px}
+    .contact-text{font-size:1.2rem;font-weight:500}
+
+    footer{background:#1a252f;color:#888;padding:40px 0;text-align:center;font-size:.9rem;border-top:1px solid rgba(255,255,255,.05)}
+    .sns-links{margin-bottom:20px}
+    .sns-links a{display:inline-block;width:40px;height:40px;line-height:40px;background:#333;color:#fff;border-radius:50%;margin:0 5px;transition:background .3s}
+    .sns-links a:hover{background:var(--primary)}
+
+    @media (max-width:992px){
+      .hero-wrap,.about-wrap{flex-direction:column;text-align:center}
+      .hero-img,.about-img{width:100%;max-width:500px;margin:0 auto}
+      .gallery-list{grid-template-columns:repeat(2,1fr)}
+      .roadmap-wrap{flex-direction:column;gap:40px}
+      .roadmap-wrap::before{width:2px;height:100%;left:50%;top:0}
+    }
+    @media (max-width:768px){
+      .gnb{display:none}
+      .mobile-btn{display:block;margin-left:auto}
+      .hero-title{font-size:2rem}
+      .contact-grid{flex-direction:column;gap:30px}
+      .card-num{display:none}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container header-inner">
+      <a href="#" class="logo">${esc(candidateName)} <span>${esc(candidateBadge)}</span></a>
+
+      <nav class="gnb">
+        <a href="#about">후보자 소개</a>
+        <a href="#pledges">5대 공약</a>
+        <a href="#roadmap">로드맵</a>
+        <a href="#news">활동소식</a>
+      </nav>
+
+      <a href="#contact" class="btn btn-primary" style="padding:10px 20px;font-size:.9rem;">연락하기</a>
+      <div class="mobile-btn" id="mobileBtn" aria-label="menu"><i class="fas fa-bars"></i></div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#about">후보자 소개</a>
+    <a href="#pledges">5대 공약</a>
+    <a href="#roadmap">로드맵</a>
+    <a href="#news">활동소식</a>
+    <a href="#contact">연락하기</a>
+  </div>
+
+  <section class="hero">
+    <div class="container hero-wrap">
+      <div class="hero-text reveal">
+        <span class="hero-badge">${esc(heroBadge)}</span>
+        <h1 class="hero-title">${heroTitle}</h1>
+        <p class="hero-desc">${heroDesc}</p>
+        <div class="hero-btns">
+          <a href="#pledges" class="btn btn-primary"><i class="fas fa-check-circle"></i> 핵심 공약 보기</a>
+          <a href="#contact" class="btn btn-outline"><i class="fas fa-envelope"></i> 의견 보내기</a>
+        </div>
+      </div>
+      <div class="hero-img reveal delay-200">
+        <img src="${state.heroImg}" alt="${esc(candidateName)} 후보">
+      </div>
+    </div>
+  </section>
+
+  <section id="pledges">
+    <div class="container">
+      <div class="sec-title reveal">
+        <h2>5대 핵심 의정과제</h2>
+        <p>생애주기별 맞춤형 복지망 구축</p>
+      </div>
+      <div class="pledge-grid">
+        ${pledgesHtml}
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="bg-gray">
+    <div class="container">
+      <div class="sec-title reveal">
+        <h2>후보자 소개</h2>
+        <p>다사가 키운 정책 전문가, ${esc(candidateName)}입니다.</p>
+      </div>
+      <div class="about-wrap">
+        <div class="about-img reveal">
+          <img src="${state.aboutImg}" alt="${esc(candidateName)} 프로필">
+        </div>
+        <div class="about-txt reveal delay-200">
+          <h3>"결과로 보답하겠습니다"</h3>
+          <ul class="profile-list">
+            ${profileHtml}
+          </ul>
+          <div class="quote-box">${quoteBox}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <div class="container">
+      <div class="sec-title reveal">
+        <h2>의정 활동 로드맵</h2>
+        <p>4개년 실행 계획</p>
+      </div>
+      <div class="roadmap-wrap">
+        ${roadmapHtml}
+      </div>
+    </div>
+  </section>
+
+  <section id="news" class="bg-gray">
+    <div class="container">
+      <div class="sec-title reveal">
+        <h2>활동 소식</h2>
+        <p>${esc(candidateName)} 후보의 생생한 현장 활동</p>
+      </div>
+      <div class="gallery-list">
+        ${newsHtml}
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact-sec">
+    <div class="container">
+      <div class="sec-title reveal">
+        <h2>주민 여러분의 목소리를 들려주세요</h2>
+        <p>지역 발전을 위한 아이디어, 건의사항 언제든 환영합니다</p>
+      </div>
+      <div class="contact-grid reveal">
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+          <div class="contact-text">${esc(phone)}</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+          <div class="contact-text">${esc(email)}</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div class="contact-text">${esc(region)}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="sns-links">
+        ${snsHtml}
+      </div>
+      <p>${footerText}</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function(){
+      // reveal 애니메이션
+      const options = { root:null, rootMargin:"0px", threshold:0.1 };
+      const observer = new IntersectionObserver((entries, obs)=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            entry.target.classList.add("active");
+            obs.unobserve(entry.target);
+          }
+        });
+      }, options);
+      document.querySelectorAll(".reveal").forEach(t=>observer.observe(t));
+
+      // 모바일 메뉴 토글
+      const btn = document.getElementById("mobileBtn");
+      const menu = document.getElementById("mobileMenu");
+      btn?.addEventListener("click", ()=>{
+        const open = menu.style.display === "block";
+        menu.style.display = open ? "none" : "block";
+      });
+      menu?.querySelectorAll("a").forEach(a=>{
+        a.addEventListener("click", ()=>{ menu.style.display="none"; });
+      });
+    });
+  </script>
+</body>
+</html>`;
+    }
+
+    function renderPreview(){
+      // 파일 입력에서 이미지 선택 시 자동 경로 반영
+      // (이미지 선택 자체는 state에 반영은 change 이벤트로 처리)
+      const html = buildGeneratedHtml();
+      $("preview").srcdoc = html;
+      return html;
+    }
+
+    // --------- 버튼들 ----------
+    $("btnRender").addEventListener("click", () => renderPreview());
+
+    $("btnDownload").addEventListener("click", () => {
+      const html = renderPreview();
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "generated.html";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    $("btnCopy").addEventListener("click", async () => {
+      const html = renderPreview();
+      try{
+        await navigator.clipboard.writeText(html);
+        alert("복사 완료. (generated.html 내용 전체)");
+      }catch(e){
+        alert("복사 실패: 브라우저 권한/HTTPS 여부 확인해줘.");
+      }
+    });
+
+    // --------- 추가 버튼 ----------
+    $("addPledge").addEventListener("click", () => {
+      state.pledges.push({ icon:"fas fa-star", title:"새 공약", desc:"설명 입력" });
+      renderAllTables(); renderPreview();
+    });
+    $("addProfile").addEventListener("click", () => {
+      state.profiles.push({ label:"항목", cont:"내용", desc:"설명" });
+      renderAllTables(); renderPreview();
+    });
+    $("addRoadmap").addEventListener("click", () => {
+      state.roadmap.push({ circle:"n년차", title:"단계", items:["항목1","항목2"] });
+      renderAllTables(); renderPreview();
+    });
+    $("addNews").addEventListener("click", () => {
+      state.news.push({ date:"2026.00", img:"/images/sample.jpg", title:"새 소식" });
+      renderAllTables(); renderPreview();
+    });
+
+    // --------- 상단 이미지 파일 선택 ----------
+    $("heroImageFile").addEventListener("change", () => {
+      setPathFromFile($("heroImageFile"), $("heroImagePath"), (p)=> state.heroImg = p);
+      renderPreview();
+    });
+    $("aboutImageFile").addEventListener("change", () => {
+      setPathFromFile($("aboutImageFile"), $("aboutImagePath"), (p)=> state.aboutImg = p);
+      renderPreview();
+    });
+
+    // --------- 초기 세팅 ----------
+    function init(){
+      // 기본 이미지 경로(형님 원본 URL 대신 로컬 /images/ 로 맞춤)
+      // 형님이 실제 파일명을 images 폴더에 넣어주면 됨
+      state.heroImg = "/images/kim3.jpg";
+      state.aboutImg = "/images/kim.jpg";
+      $("heroImagePath").textContent = state.heroImg;
+      $("aboutImagePath").textContent = state.aboutImg;
+
+      renderAllTables();
+      bindTableEvents();
+      renderPreview();
+    }
+    init();
+  </script>
+</body>
+</html>
